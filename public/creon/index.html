@@ -1,0 +1,2571 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contents Builder</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&family=Material+Symbols+Sharp:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Specific icon support for Rounded style -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=book,book_2,book_3,book_4,book_5,book_6" />
+    <!-- Material Icons for compatibility -->
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./index.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.run/@google/genai"
+        }
+      }
+    </script>
+    <script
+      src="https://unpkg.com/@dotlottie/player-component@latest/dist/dotlottie-player.mjs"
+      type="module"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+  <link rel="stylesheet" href="./index.css">
+  <script type="module" crossorigin src="./assets/index-dxbq5Pem.js"></script>
+</head>
+  <body data-theme="light">
+    <div class="app-container">
+      <header class="app-header">
+        <div class="logo">
+          <img id="logo-image" src="./logo.png" alt="Creon" class="logo-img" onerror="this.style.display='none';" onload="this.style.display='block';">
+          <h1 class="logo-text">Creon</h1>
+        </div>
+        <nav class="main-nav" id="main-nav">
+          <a href="#" class="nav-item" data-page="page-icons">Icon Studio</a>
+          <a href="#" class="nav-item" data-page="page-id-2d">2D Studio</a>
+          <a href="#" class="nav-item" data-page="page-id-3d">3D Studio</a>
+          <a href="#" class="nav-item" data-page="page-image">Image Studio</a>
+        </nav>
+        <div class="header-actions">
+          <button id="mobile-menu-toggle" class="mobile-menu-toggle icon-button" aria-label="Toggle menu" aria-expanded="false">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+          <button id="login-btn" class="header-action-btn login-btn" aria-label="Login" title="Login" style="background-color: var(--accent-color, #2962FF); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 500; width: fit-content; height: 32px; font-size: 14px;">
+            로그인
+          </button>
+          <button id="history-btn" class="header-action-btn history-btn icon-button hidden" aria-label="History" title="History" style="background: none; border: none; padding: 8px; width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s;">
+            <span class="material-symbols-outlined">history</span>
+          </button>
+          <!-- Profile Dropdown -->
+          <div id="profile-dropdown" class="profile-dropdown hidden" style="position: relative;">
+            <div id="profile-dropdown-menu" class="profile-dropdown-menu hidden" style="position: absolute; top: 100%; right: 0; margin-top: 8px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); min-width: 160px; z-index: 1000; overflow: hidden;">
+              <button id="api-key-menu-item" class="profile-dropdown-item" style="width: 100%; padding: 12px 16px; text-align: left; background: none; border: none; color: var(--text-primary); font-size: 14px; cursor: pointer; transition: background-color 0.2s;">
+                API key
+              </button>
+              <div style="height: 1px; background: var(--border-color); margin: 4px 0;"></div>
+              <button id="logout-menu-item" class="profile-dropdown-item" style="width: 100%; padding: 12px 16px; text-align: left; background: none; border: none; color: var(--text-primary); font-size: 14px; cursor: pointer; transition: background-color 0.2s;">
+                로그아웃
+              </button>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Mobile Menu Backdrop -->
+      <div id="mobile-menu-backdrop" class="mobile-menu-backdrop"></div>
+      
+      <!-- Filters Panel Backdrop (Mobile - 768px 미만) -->
+      <div id="filters-panel-backdrop" class="filters-panel-backdrop"></div>
+      
+      <!-- Settings Panel Backdrop (Mobile - 768px 미만) -->
+      <div id="settings-panel-backdrop" class="settings-panel-backdrop"></div>
+      
+      <!-- Bottom Navigation Bar (Mobile - 768px 미만) -->
+      <nav id="bottom-nav" class="bottom-nav">
+        <a href="#" class="bottom-nav-item active" data-page="page-usages" aria-label="Home">
+          <span class="material-symbols-outlined bottom-nav-icon">home</span>
+          <span class="bottom-nav-label">Home</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="page-icons" aria-label="Icon Studio">
+          <span class="material-symbols-outlined bottom-nav-icon">apps</span>
+          <span class="bottom-nav-label">Icon</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="page-id-2d" aria-label="2D Studio">
+          <span class="material-symbols-outlined bottom-nav-icon">auto_awesome</span>
+          <span class="bottom-nav-label">2D</span>
+        </a>
+        <a href="#" class="bottom-nav-item" data-page="page-id-3d" aria-label="3D Studio">
+          <span class="material-symbols-outlined bottom-nav-icon">view_in_ar</span>
+          <span class="bottom-nav-label">3D</span>
+        </a>
+      </nav>
+      
+      <div id="banner-toast" class="banner-toast hidden" role="alert" aria-live="assertive">
+        <div class="banner-toast-content">
+            <span id="banner-toast-icon" class="material-symbols-outlined"></span>
+            <div class="banner-toast-text">
+                <strong id="banner-toast-title"></strong>
+                <span id="banner-toast-body"></span>
+            </div>
+        </div>
+        <div class="banner-toast-actions">
+            <button id="banner-toast-close-btn" class="icon-button" aria-label="Close notification">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+      </div>
+
+      <div id="page-usages" class="page-container">
+        <div class="explore-container">
+          <main class="explore-main">
+            <input type="file" id="explore-upload-input" multiple class="hidden" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm">
+            
+            <div class="hero-content-wrapper">
+              <!-- Changelog Section -->
+              <div class="changelog-section" id="changelog-section">
+                <!-- Changelog items will be dynamically rendered here -->
+              </div>
+
+              <!-- Hero Section -->
+              <div class="hero-section">
+                <h1 class="hero-title">Build what you imagine.<br><span class="hero-title-second-line">Create beyond boundaries.</span></h1>
+                <p class="hero-description">From icons to 3D motion, all in one creative pipeline.</p>
+              </div>
+            </div>
+            
+            <!-- Generate Box moved outside hero-content-wrapper for sticky to work -->
+            <div class="generate-box has-studio-selected">
+                  <select id="studio-selector" class="studio-selector hidden">
+                    <option value="icon">Icon</option>
+                    <option value="3d" selected>3D</option>
+                  </select>
+                  <div class="custom-dropdown" id="custom-studio-selector">
+                    <button class="custom-dropdown-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+                      <span class="custom-dropdown-value">3D</span>
+                      <span class="material-symbols-outlined custom-dropdown-icon">expand_more</span>
+                    </button>
+                    <div class="custom-dropdown-menu hidden" role="listbox">
+                      <button class="custom-dropdown-option" role="option" data-value="icon" aria-selected="false">
+                        <span class="custom-dropdown-option-text">Icon</span>
+                        <span class="custom-dropdown-check hidden">
+                          <span class="material-symbols-outlined">check</span>
+                        </span>
+                      </button>
+                      <button class="custom-dropdown-option" role="option" data-value="3d" aria-selected="true">
+                        <span class="custom-dropdown-option-text">3D</span>
+                        <span class="custom-dropdown-check">
+                          <span class="material-symbols-outlined">check</span>
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                  <div style="position: relative; flex: 1;">
+                    <input type="text" id="generate-input" placeholder="" style="width: 100%; padding-left: 12px; padding-right: 120px;" />
+                    <div class="dynamic-placeholder" id="dynamic-placeholder">Ask Contents Builder to create...</div>
+                    <button id="generate-input-clear-btn" class="icon-button" style="position: absolute; top: 50%; transform: translateY(-50%); display: none; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; width: 24px; height: 24px; border-radius: 50%; transition: background-color 0.2s; z-index: 2;" aria-label="Clear input">
+                      <span class="material-symbols-outlined" style="font-size: 18px;">close</span>
+                    </button>
+                  </div>
+                  <button id="generate-btn" class="generate-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                    <span class="material-symbols-outlined generate-btn-icon">auto_awesome</span>
+                    <span class="btn-text">Generate</span>
+                  </button>
+            </div>
+                
+            <!-- Reference Image Upload Area -->
+            <div class="main-reference-container" id="main-reference-container" style="display: none;">
+              <div class="control-card">
+                <h3>Reference Image</h3>
+                <div class="image-drop-zone" id="main-reference-drop-zone">
+                  <div class="drop-zone-content">
+                    <div class="drop-zone-prompt">
+                      <span class="material-symbols-outlined">add_photo_alternate</span>
+                      <p>Drop image here or click to upload</p>
+                    </div>
+                    <img class="drop-zone-preview hidden" alt="Reference preview" />
+                  </div>
+                  <div class="drop-zone-overlay">
+                    <button type="button" id="main-generate-with-text-btn">
+                      <span class="material-symbols-outlined">text_fields</span>
+                      <span class="overlay-text-label">Generate with Text</span>
+                    </button>
+                    <div class="overlay-divider"></div>
+                    <button type="button" id="main-attach-image-btn">
+                      <span class="material-symbols-outlined">attach_file</span>
+                      <span class="overlay-text-label">Attach Image</span>
+                    </button>
+                  </div>
+                  <button class="remove-style-image-btn hidden" id="main-remove-reference-btn">
+                    <span class="material-symbols-outlined">close</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div id="explore-feed-container">
+                <div id="explore-empty-state">
+                </div>
+                <div id="explore-feed" class="explore-feed">
+                    <!-- Media cards will be injected here -->
+                </div>
+                <div id="explore-sentinel" class="explore-sentinel">
+                    <div class="loader hidden"></div>
+                </div>
+                <p id="explore-end-of-results" class="end-of-results-note hidden">End of results</p>
+            </div>
+          </main>
+        </div>
+      </div>
+      
+      <!-- Explore Details Modal (Center Popup) -->
+      <!-- History Modal -->
+      <div id="history-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="max-width: 800px; width: 90vw; max-height: 90vh; display: flex; flex-direction: column; border-radius: 24px;">
+          <header style="display: flex; justify-content: space-between; align-items: center; padding: 0; height: 24px;">
+            <h2 style="font-size: 20px; font-weight: 700; margin: 0;">History</h2>
+            <button id="history-modal-close-btn" class="icon-button" aria-label="Close" style="background: none; border: none; padding: 0; width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </header>
+          <div id="history-modal-content" style="flex: 1; overflow-y: auto; padding: 24px 0 0 0; display: flex; flex-direction: column; gap: 16px;">
+            <!-- History items will be inserted here -->
+          </div>
+        </div>
+      </div>
+      
+      <!-- History Detail Modal (768px 미만) -->
+      <div id="history-detail-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="max-width: 800px; width: 90vw; max-height: 90vh; display: flex; flex-direction: column; border-radius: 24px;">
+          <header style="display: flex; justify-content: space-between; align-items: center; padding: 0; height: 24px;">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <button id="history-detail-back-btn" class="icon-button" aria-label="Back" style="background: none; border: none; padding: 0; width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s;">
+                <span class="material-symbols-outlined">arrow_back</span>
+              </button>
+              <h2 id="history-detail-title" style="font-size: 20px; font-weight: 700; margin: 0;">History</h2>
+            </div>
+            <button id="history-detail-close-btn" class="icon-button" aria-label="Close" style="background: none; border: none; padding: 0; width: 40px; height: 40px; border-radius: 50%; color: var(--text-primary); cursor: pointer; transition: background-color 0.2s;">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </header>
+          <div id="history-detail-content" style="flex: 1; overflow-y: auto; padding: 24px 0 0 0; display: flex; flex-direction: column; gap: 16px;">
+            <!-- History detail will be inserted here -->
+          </div>
+        </div>
+      </div>
+      
+      <div id="explore-details-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="max-width: 800px; width: 90vw; max-height: 90vh; display: flex; flex-direction: column; border-radius: 24px;">
+          <header style="display: flex; justify-content: space-between; align-items: center; padding: 0; height: 24px;">
+            <h2 id="explore-details-title" style="margin: 0; font-size: 20px; font-weight: 600;">Details</h2>
+            <button id="explore-details-close-btn" class="icon-button" aria-label="Close Details">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </header>
+          <div id="explore-details-content" style="flex: 1; overflow-y: auto; padding: 60px var(--spacing-5) var(--spacing-5) var(--spacing-5); display: flex; flex-direction: column; gap: var(--spacing-5);">
+            <div id="explore-details-preview-container" style="display: flex; justify-content: center; align-items: center; min-height: 300px;">
+              <!-- JS will render preview here -->
+            </div>
+            <div id="explore-details-info" class="details-info-grid">
+              <!-- JS will render file info here -->
+            </div>
+            <div id="explore-details-prompt" class="hidden" style="display: flex; flex-direction: column; gap: 8px;">
+              <label style="font-weight: 500;">Used Prompt</label>
+              <div class="code-box">
+                <pre><code id="explore-details-prompt-code"></code></pre>
+                <button id="explore-details-copy-prompt-btn" class="icon-button copy-button" aria-label="Copy prompt">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+              </div>
+            </div>
+            <p id="explore-details-no-prompt" class="hidden" style="font-size: 13px; color: var(--text-secondary);">No prompt found for this asset.</p>
+          </div>
+          <footer style="padding: 0; display: flex; justify-content: flex-end;">
+            <a href="#" id="explore-details-download-btn" class="secondary-btn" download style="display: flex; align-items: center; gap: var(--spacing-2);">
+              <span class="material-symbols-outlined">download</span>
+              <span>Download</span>
+            </a>
+          </footer>
+        </div>
+      </div>
+      
+      <div id="page-icons" class="page-container hidden">
+        <aside class="filters-panel">
+          <div class="filters-panel-header">
+            <h2>Filters</h2>
+            <button id="filters-close-btn" class="icon-button" aria-label="Close Filters">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="filter-group">
+            <label>Style</label>
+            <div class="segmented-control">
+              <input type="radio" id="style-outlined" name="icon-family" value="Outlined" checked />
+              <label for="style-outlined">Outlined</label>
+              <input type="radio" id="style-rounded" name="icon-family" value="Rounded" />
+              <label for="style-rounded">Rounded</label>
+              <input type="radio" id="style-sharp" name="icon-family" value="Sharp" />
+              <label for="style-sharp">Sharp</label>
+            </div>
+          </div>
+          
+          <div class="filter-group">
+             <div class="control-row">
+              <label for="fill-toggle">Fill</label>
+              <label class="toggle-switch">
+                <input type="checkbox" id="fill-toggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="filter-group">
+            <div class="control-row">
+              <label for="weight-slider">Weight (Stroke)</label>
+              <span class="slider-value" id="weight-value">Value: 400</span>
+            </div>
+            <input type="range" id="weight-slider" min="100" max="700" value="400" step="100" />
+          </div>
+          
+          <div class="filter-group">
+            <div class="control-row">
+              <label for="optical-size-slider" class="optical-size-label">
+                Optical Size
+                <span class="material-symbols-outlined info-icon" title="Optical size automatically adjusts the stroke weight to improve legibility at different icon sizes.">info</span>
+              </label>
+            </div>
+            <input type="range" id="optical-size-slider" min="20" max="48" value="24" step="1" />
+            <div class="slider-labels">
+                <span>20px</span>
+                <span>48px</span>
+            </div>
+          </div>
+        </aside>
+
+        <main class="icon-grid-panel">
+          <h1 class="explore-title">Icon Studio</h1>
+          <div class="icon-grid-header">
+            <div class="search-box">
+              <button id="toggle-filters-panel-btn">
+                <span class="material-symbols-outlined">tune</span>
+                <span>Filter</span>
+              </button>
+              <input type="search" id="search-input" placeholder="Search icons" />
+              <button class="icon-button search-icon-btn" aria-label="Search">
+                <span class="material-symbols-outlined">search</span>
+              </button>
+            </div>
+          </div>
+          <div id="icon-grid-body" class="icon-grid-body">
+            <div id="icon-grid"></div>
+          </div>
+        </main>
+
+        <aside id="settings-panel" class="settings-panel hidden">
+          <div class="settings-panel-content">
+            <header class="settings-header">
+              <h2 id="settings-title">Settings</h2>
+              <button id="settings-close-btn" class="icon-button" aria-label="Close">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </header>
+            <nav id="settings-tabs" class="settings-tabs">
+              <button class="tab-item active" data-tab="details">Details</button>
+              <button class="tab-item" data-tab="motion">Motion</button>
+              <button class="tab-item" data-tab="3d">3D Generate</button>
+            </nav>
+            <div class="settings-body">
+              <div class="tab-content active" data-tab-content="details">
+                <div class="tab-scroll-content">
+                  <div class="preview-box-lg" id="preview-box-container">
+                      <span id="settings-preview-icon" class="material-symbols-outlined"></span>
+                      <img id="settings-preview-image" alt="Generated Icon Preview" class="hidden" />
+                  </div>
+                  
+                  <div id="font-icon-details">
+                      <div class="size-color-group">
+                        <div class="filter-group">
+                            <div class="control-row">
+                                <label for="export-size-input">Size</label>
+                            </div>
+                            <div class="input-with-suffix">
+                                <input type="number" id="export-size-input" value="48" min="1">
+                                <span>px</span>
+                            </div>
+                        </div>
+                        <div class="filter-group">
+                          <div class="control-row">
+                            <label for="color-picker">Main Color</label>
+                          </div>
+                          <div class="input-with-suffix color-input">
+                            <div class="input-swatch">
+                              <input type="color" id="color-picker" value="#0F172A" class="color-swatch-input" />
+                            </div>
+                            <span id="color-picker-value" class="color-value">#0F172A</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div id="tags-container" class="tags-container"></div>
+                      <p id="keywords-display" class="keywords"></p>
+
+                      <div class="code-snippets">
+                        <nav id="snippet-tabs" class="snippet-tabs">
+                          <button class="snippet-tab-item active" data-lang="html">HTML</button>
+                          <button class="snippet-tab-item" data-lang="react">React</button>
+                          <button class="snippet-tab-item" data-lang="vue">Vue</button>
+                          <button class="snippet-tab-item" data-lang="svelte">Svelte</button>
+                        </nav>
+                        <div class="code-box">
+                          <pre><code id="snippet-code"></code></pre>
+                          <button id="copy-snippet-btn" class="icon-button copy-button" aria-label="Copy code">
+                            <span class="material-symbols-outlined">content_copy</span>
+                          </button>
+                        </div>
+                      </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="tab-content hidden" data-tab-content="motion">
+                <div class="tab-scroll-content">
+                    <div class="preview-box-lg" id="motion-preview-box">
+                        <span id="motion-preview-icon" class="material-symbols-outlined"></span>
+                        <img id="motion-generated-image" alt="Generated 3D Icon Preview" class="hidden" />
+                        <div id="lottie-player-container" class="hidden"></div>
+                        <div id="motion-loader" class="loader hidden"></div>
+                        <p id="motion-error-message" class="hidden"></p>
+                    </div>
+
+                    <div class="motion-control-group">
+                        <div class="motion-control-row">
+                            <div class="control-label">
+                                <span>Motion</span>
+                            </div>
+                            <div class="control-input-group">
+                                <select class="motion-select" id="motion-animation-select">
+                                    <optgroup label="Appear">
+                                        <option value="fade-in">Fade In</option>
+                                        <option value="draw-on">Draw On</option>
+                                    </optgroup>
+                                    <optgroup label="Emphasis">
+                                        <option value="bounce">Bounce</option>
+                                        <option value="scale">Scale</option>
+                                        <option value="shake">Shake</option>
+                                        <option value="rotate">Rotate</option>
+                                        <option value="breathe">Breathe</option>
+                                        <option value="pulse">Pulse</option>
+                                        <option value="variable-color">Variable Color</option>
+                                        <option value="replace" selected>Replace</option>
+                                    </optgroup>
+                                    <optgroup label="Disappear">
+                                        <option value="fade-out">Fade Out</option>
+                                        <option value="draw-off">Draw Off</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="motion-control-row">
+                            <div class="control-label">
+                                <span>Repeat</span>
+                            </div>
+                            <div class="control-input-group">
+                                <select class="motion-select" id="motion-repeat-select">
+                                    <option value="1">Once</option>
+                                    <option value="infinite">Loop</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="motion-control-row">
+                            <div class="control-label">
+                                <span></span>
+                            </div>
+                            <div class="control-input-group">
+                                <button id="motion-play-btn" class="secondary-btn" style="width: 100%;">
+                                    <span class="material-symbols-outlined">play_arrow</span>
+                                    Play
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-footer">
+                  <div class="motion-actions">
+                      <button id="convert-to-lottie-btn" class="secondary-btn">
+                          <span class="material-symbols-outlined">download</span>
+                          <span class="btn-text">Lottie</span>
+                          <div class="btn-loader"></div>
+                      </button>
+                      <button id="convert-to-mp4-btn" class="primary-btn">
+                          <span class="material-symbols-outlined">movie</span>
+                          <span class="btn-text">MP4</span>
+                          <div class="btn-loader"></div>
+                      </button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="tab-content hidden" data-tab-content="3d">
+                <div class="tab-scroll-content">
+                  <div class="preview-box-lg">
+                      <div id="id-3d-placeholder" class="preview-placeholder">
+                          <span class="material-symbols-outlined">auto_awesome</span>
+                          <p>Your 3D icon will appear here</p>
+                      </div>
+                      <div id="id-3d-error-placeholder" class="preview-placeholder hidden">
+                          <span class="material-symbols-outlined">error</span>
+                          <p class="error-text">Generation failed. Please try again.</p>
+                      </div>
+                      <div id="loader" class="loader hidden"></div>
+                      <img id="generated-image" alt="Generated 3D Icon" class="hidden" />
+                      <button id="view-larger-btn" class="icon-button view-larger-btn hidden" aria-label="View larger">
+                          <span class="material-symbols-outlined">zoom_in</span>
+                      </button>
+                  </div>
+
+                  <div class="filter-group" style="margin-bottom: 16px;">
+                      <div class="control-row">
+                          <label for="prompt-input-3d">Custom Prompt</label>
+                      </div>
+                      <input type="text" id="prompt-input-3d" class="rename-input" placeholder="e.g. blue backpack, red apple" style="width: 100%;">
+                  </div>
+
+                  <div class="prompt-display-wrapper">
+                      <div class="prompt-card-header">
+                          <label for="prompt-display-3d">Style Constraints</label>
+                      </div>
+                      <textarea id="prompt-display-3d" readonly></textarea>
+                      <div class="shadow-toggle-control">
+                          <label for="shadow-toggle-icons">Add Ground Shadow</label>
+                          <label class="toggle-switch">
+                            <input type="checkbox" id="shadow-toggle-icons">
+                            <span class="toggle-slider"></span>
+                          </label>
+                      </div>
+                  </div>
+
+                  <div class="filter-group">
+                      <label>Reference Images (Optional)</label>
+                      <div id="reference-image-container-3d" class="reference-image-container">
+                          <div class="image-drop-zone reference-drop-zone" data-index="0">
+                              <div class="drop-zone-prompt">
+                                  <span class="material-symbols-outlined">add_photo_alternate</span>
+                              </div>
+                              <img class="style-image-preview hidden" alt="Reference image 1">
+                              <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 1">
+                                  <span class="material-symbols-outlined">delete</span>
+                              </button>
+                          </div>
+                          <div class="image-drop-zone reference-drop-zone" data-index="1">
+                              <div class="drop-zone-prompt">
+                                  <span class="material-symbols-outlined">add_photo_alternate</span>
+                              </div>
+                              <img class="style-image-preview hidden" alt="Reference image 2">
+                              <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 2">
+                                  <span class="material-symbols-outlined">delete</span>
+                              </button>
+                          </div>
+                          <div class="image-drop-zone reference-drop-zone" data-index="2">
+                              <div class="drop-zone-prompt">
+                                  <span class="material-symbols-outlined">add_photo_alternate</span>
+                              </div>
+                              <img class="style-image-preview hidden" alt="Reference image 3">
+                              <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 3">
+                                  <span class="material-symbols-outlined">delete</span>
+                              </button>
+                          </div>
+                      </div>
+                      <input type="file" id="reference-image-input-3d" class="hidden" accept="image/*">
+                  </div>
+                </div>
+                <div class="tab-footer">
+                  <div class="settings-actions">
+                    <button id="convert-to-3d-btn" class="primary-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                      <span class="material-symbols-outlined">auto_awesome</span>
+                      <span class="btn-text">Generate</span>
+                      <div class="btn-loader"></div>
+                    </button>
+                    <a href="#" id="download-3d-btn" class="secondary-btn hidden" download="icon_3d.png">
+                      <span class="material-symbols-outlined">download</span> Download
+                    </a>
+                    <button id="regenerate-3d-btn" class="secondary-btn hidden">
+                      <span class="material-symbols-outlined">refresh</span>
+                      <span class="btn-text">Recreate</span>
+                      <div class="btn-loader"></div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <footer class="settings-footer" data-visible-tab="details">
+            <div class="settings-actions">
+              <button class="secondary-btn" id="download-svg-btn" disabled>
+                <span class="material-symbols-outlined">download</span>
+                <span>SVG</span>
+              </button>
+              <button class="secondary-btn" id="download-png-btn" disabled>
+                <span class="material-symbols-outlined">download</span>
+                <span>PNG</span>
+              </button>
+            </div>
+          </footer>
+          </div>
+        </aside>
+      </div>
+
+      <div id="page-id-2d" class="page-container hidden">
+        <h1 class="page-title-mobile">2D Studio</h1>
+        <div class="image-gen-container">
+            <div class="image-gen-controls">
+                <div class="controls-scroll-area">
+                    <div class="control-card history-panel hidden">
+                        <div class="history-header">
+                            <h3>History</h3>
+                            <div class="history-actions">
+                                <div class="history-nav-controls">
+                                    <button id="p2d-history-back-btn" class="icon-button" aria-label="Previous">
+                                        <span class="material-symbols-outlined">arrow_back</span>
+                                    </button>
+                                    <span id="p2d-history-counter">0 / 0</span>
+                                    <button id="p2d-history-forward-btn" class="icon-button" aria-label="Next">
+                                        <span class="material-symbols-outlined">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-list-container">
+                            <ul id="p2d-history-list"></ul>
+                            <div id="p2d-history-placeholder" class="hidden">
+                                <p>Your generated images will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 1. Prompt Card -->
+                    <div class="control-card">
+                        <div class="prompt-card-header">
+                            <h3>Prompt</h3>
+                        </div>
+                        <input type="text" id="p2d-image-prompt-subject-input" placeholder="ex. 나무에 매달린 원숭이">
+                        
+                        <!-- Generate Button -->
+                        <button id="p2d-image-generate-btn" class="primary-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span class="btn-text">Generate</span>
+                            <div class="btn-loader"></div>
+                        </button>
+                    </div>
+                    
+                    <!-- 2. Prompt Detail Card -->
+                    <div class="control-card">
+                        <div class="detail-group">
+                            <h3 class="options-title">Options</h3>
+                            <div class="options-group p2d-options-group">
+                            <div class="option-row">
+                                <label for="p2d-fill-toggle">Fill</label>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="p2d-fill-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="option-row">
+                                <label for="p2d-color-picker">Main Color</label>
+                                <div class="input-with-suffix color-input">
+                                    <div class="input-swatch">
+                                        <input type="color" id="p2d-color-picker" value="#212121" class="color-swatch-input" />
+                                    </div>
+                                    <span class="color-value">#212121</span>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="prompt-card-header">
+                                <h3>Prompt Detail</h3>
+                            </div>
+                            <textarea id="p2d-image-prompt-display" readonly></textarea>
+                        </div>
+                    </div>
+                    <div class="control-card">
+                        <!-- Reference Images Accordion -->
+                        <div class="accordion">
+                            <div class="accordion-header" data-accordion="p2d-reference">
+                                <h3>Reference Images</h3>
+                                <span class="material-symbols-outlined accordion-icon">expand_more</span>
+                            </div>
+                            <div class="accordion-content" id="p2d-reference-content">
+                                <div id="p2d-edit-reference-image-container-3d" class="reference-image-container">
+                            <div class="image-drop-zone reference-drop-zone" data-index="0">
+                                <span class="slot-title">Fill_On</span>
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 1">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 1"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                            <div class="image-drop-zone reference-drop-zone" data-index="1">
+                                <span class="slot-title">Fill_Off</span>
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 2">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 2"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                            <div class="image-drop-zone reference-drop-zone" data-index="2">
+                                <span class="slot-title">Weight_light</span>
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 3">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 3"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                            <div class="image-drop-zone reference-drop-zone" data-index="3">
+                                <span class="slot-title">Weight_bold</span>
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 4">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 4"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                        <input type="file" id="p2d-edit-reference-image-input-3d" class="hidden" accept="image/*">
+                    </div>
+                    <!-- 4. Image Library Accordion Card -->
+                    <div class="control-card">
+                        <div class="accordion">
+                            <div class="accordion-header" data-accordion="p2d-library">
+                                <h3>Image Library</h3>
+                                <span class="material-symbols-outlined accordion-icon">expand_more</span>
+                            </div>
+                            <div class="accordion-content" id="p2d-library-content">
+                                <div id="p2d-image-library-container" class="image-library-container">
+                                    <div id="p2d-image-library-placeholder">
+                                        <p>Your saved images will appear here.</p>
+                                    </div>
+                                    <div id="p2d-image-library-list" class="image-library-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-gen-results">
+                <div class="result-container">
+                    <div id="p2d-result-item-main" class="result-item" tabindex="0">
+                        <div class="result-item-content">
+                            <div class="result-content-header hidden">
+                                <div class="preview-switcher">
+                                    <button id="p2d-preview-tab-image" class="preview-tab-item active" data-tab="image">Image</button>
+                                    <button id="p2d-preview-tab-motion" class="preview-tab-item" data-tab="motion">Motion</button>
+                                </div>
+                                <div class="result-actions">
+                                    <button id="p2d-toggle-details-panel-btn" class="icon-button" aria-label="Toggle details panel">
+                                        <span class="material-symbols-outlined">info</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="result-media-container" id="p2d-result-media-container">
+                                <div id="p2d-result-idle-placeholder" class="result-placeholder-content" style="display: flex; justify-content: center; align-items: center; height: 100%; background: #ffffff; position: relative; overflow: hidden;">
+                                    <div id="p2d-animated-samples-container" style="position: absolute; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                                        <!-- Images will be loaded dynamically from assets_2d_images.json -->
+                                    </div>
+                                </div>
+                                <div class="result-placeholder hidden">
+                                    <div class="result-loading">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span class="loader-text">Generating...</span>
+                                    </div>
+                                    <div class="result-error">
+                                        <span class="material-symbols-outlined">error</span>
+                                        <p>Generation Failed</p>
+                                        <button id="p2d-retry-generate-btn" class="secondary-btn">Try Again</button>
+                                    </div>
+                                </div>
+                                <div id="p2d-motion-prompt-placeholder" class="result-placeholder-content hidden">
+                                    <span class="material-symbols-outlined motion-placeholder-icon">movie</span>
+                                    <p class="motion-placeholder-title">Ready to animate?</p>
+                                    <p>Generate a motion prompt to create a looping animation from this icon.</p>
+                                    <button id="p2d-generate-motion-from-preview-btn" class="secondary-btn motion-generate-btn">
+                                      <span class="material-symbols-outlined">animation</span>
+                                      Generate Motion
+                                    </button>
+                                </div>
+                                <video id="p2d-result-video" class="result-video hidden" controls loop autoplay muted playsinline></video>
+                                <img src="" alt="Generated 2D image" class="result-image hidden" id="p2d-result-image-main">
+                                <label class="checkerboard-toggle" id="p2d-result-checkerboard-toggle" style="display: none;">
+                                    <input type="checkbox" id="p2d-result-checkerboard-checkbox" checked>
+                                    <span>Show checkerboard</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside id="p2d-image-details-panel" class="details-panel hidden">
+                <div class="details-panel-content">
+                    <header class="details-panel-header">
+                        <h2>Details</h2>
+                        <button id="p2d-details-close-btn" class="icon-button" aria-label="Close details">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </header>
+                    <div class="details-panel-tabs">
+                        <button class="tab-item active" data-tab="detail">Detail</button>
+                        <button class="tab-item" data-tab="motion">Motion</button>
+                        <button class="tab-item" data-tab="history">History</button>
+                    </div>
+                    <div class="details-panel-body">
+                        <div class="details-tab-content" data-tab-content="detail">
+                            <div class="details-content-scroll">
+                                <div class="details-preview" id="p2d-details-preview-container">
+                                    <img id="p2d-details-preview-image" src="" alt="Details preview">
+                                    <label class="checkerboard-toggle" id="p2d-preview-checkerboard-toggle" style="display: none;">
+                                        <input type="checkbox" id="p2d-preview-checkerboard-checkbox" checked>
+                                        <span>Show checkerboard</span>
+                                    </label>
+                                </div>
+                                
+                                <!-- Fix the icon section -->
+                                <div style="display: flex; flex-direction: column; gap: var(--spacing-3);">
+                                    <h3 style="font-size: 16px; font-weight: 600; margin: 0;">Fix the icon</h3>
+                                    <div class="details-fix-section">
+                                        <div id="p2d-fix-icon-content">
+                                    <!-- Stroke Color Input -->
+                                    <div class="option-row">
+                                        <label for="p2d-object-color-picker">Stroke</label>
+                                        <div class="input-with-suffix color-input">
+                                          <div class="input-swatch">
+                                            <input type="color" id="p2d-object-color-picker" value="#000000" class="color-swatch-input" />
+                                          </div>
+                                          <span class="color-value">#000000</span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Convert to SVG Button (full width, above) -->
+                                    <button id="p2d-convert-to-svg-btn" class="secondary-btn" style="display: none; width: 100%; margin-top: var(--spacing-2); height: 40px;">
+                                        <span class="material-symbols-outlined">code</span>
+                                        <span class="btn-text">Convert to SVG</span>
+                                    </button>
+                                    
+                                    <!-- Remove BG (middle button) -->
+                                    <div id="p2d-action-buttons-container" style="display: grid; grid-template-columns: 1fr; gap: var(--spacing-2); margin-top: var(--spacing-2);">
+                                        <button id="p2d-remove-background-btn" class="secondary-btn">
+                                            <span class="material-symbols-outlined">content_cut</span> Remove BG
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Recreate Button (always at bottom) -->
+                                    <button id="p2d-regenerate-btn" class="secondary-btn" style="width: 100%; margin-top: var(--spacing-2); height: 40px;" disabled>
+                                        <span class="material-symbols-outlined">auto_awesome</span>
+                                        <span class="btn-text">Recreate</span>
+                                        <div class="btn-loader"></div>
+                                    </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom Actions: More menu + Download -->
+                            <div class="details-actions p2d-details-actions">
+                                <button id="p2d-more-menu-btn" class="icon-button" aria-label="More actions" title="More actions">
+                                    <span class="material-symbols-outlined">more_horiz</span>
+                                </button>
+                                <!-- More menu dropdown -->
+                                <div id="p2d-more-menu" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 180px; overflow: hidden; z-index: 20;">
+                                    <button id="p2d-more-copy" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">content_copy</span> Copy
+                                    </button>
+                                    <button id="p2d-more-delete" class="secondary-btn danger" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">delete</span> Delete
+                                    </button>
+                                </div>
+                                <a href="#" id="p2d-download-png-btn" class="secondary-btn hidden" download>
+                                    <span class="material-symbols-outlined">download</span> PNG
+                                </a>
+                                <a href="#" id="p2d-download-svg-btn" class="secondary-btn hidden" download>
+                                    <span class="material-symbols-outlined">download</span> SVG
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- Motion Tab Content -->
+                        <div class="details-tab-content hidden" data-tab-content="motion">
+                            <div class="motion-fixed-header">
+                                <div class="motion-thumbnail-container">
+                                    <img id="p2d-motion-thumbnail-image" src="" alt="Motion thumbnail">
+                                    <div class="motion-thumbnail-info">
+                                        <span id="p2d-motion-thumbnail-label"></span>
+                                        <span class="motion-thumbnail-desc">Ready for animation</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="motion-scroll-content">
+                                <div class="video-result-container hidden" id="p2d-motion-video-container">
+                                    <video id="p2d-motion-video-player" controls loop autoplay muted playsinline></video>
+                                    <div id="p2d-motion-video-loader" class="result-loading hidden">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span id="p2d-motion-gen-status-text" class="loader-text">Generating video...</span>
+                                    </div>
+                                </div>
+                                <div id="p2d-motion-reference-image-container" class="reference-image-container">
+                                  <div class="image-drop-zone reference-drop-zone" data-index="0">
+                                    <span class="slot-title">First Frame</span>
+                                    <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                    <img class="style-image-preview hidden" alt="First frame reference image">
+                                    <button class="remove-style-image-btn icon-button hidden" aria-label="Remove First Frame"><span class="material-symbols-outlined">delete</span></button>
+                                  </div>
+                                  <div class="image-drop-zone reference-drop-zone" data-index="1">
+                                    <span class="slot-title">Last Frame</span>
+                                    <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                    <img class="style-image-preview hidden" alt="Last frame reference image">
+                                    <button class="remove-style-image-btn icon-button hidden" aria-label="Remove Last Frame"><span class="material-symbols-outlined">delete</span></button>
+                                  </div>
+                                </div>
+                                <input type="file" id="p2d-motion-reference-image-input" class="hidden" accept="image/*">
+                                <div class="control-card" style="padding: 0;">
+                                    <h3>Model Selection</h3>
+                                    <div class="segmented-control" id="p2d-motion-model-select">
+                                        <input type="radio" id="p2d-motion-model-fast" name="p2d-motion-model" value="veo-3.1-fast-generate-preview" checked />
+                                        <label for="p2d-motion-model-fast">Veo 3.1 Fast</label>
+                                        <input type="radio" id="p2d-motion-model-hq" name="p2d-motion-model" value="veo-3.1-generate-preview" />
+                                        <label for="p2d-motion-model-hq">Veo 3.1</label>
+                                    </div>
+                                </div>
+                                <div id="p2d-motion-prompt-output" class="hidden">
+                                    <div class="control-card">
+                                        <label for="p2d-motion-prompt-final-english">Final Prompt</label>
+                                        <textarea id="p2d-motion-prompt-final-english" rows="4"></textarea>
+                                    </div>
+                                    <div class="control-card">
+                                        <label>Description (Korean)</label>
+                                        <div id="p2d-motion-prompt-korean" class="description-box"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="details-actions p2d-motion-actions">
+                                <button id="p2d-generate-motion-prompt-btn" class="primary-btn full-width-btn">
+                                    <span class="material-symbols-outlined">animation</span>
+                                    <span class="btn-text">Generate Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="p2d-regenerate-motion-prompt-btn" class="secondary-btn hidden full-width-btn">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Motion Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="p2d-generate-video-btn" class="primary-btn hidden full-width-btn">
+                                    <span class="material-symbols-outlined">movie</span>
+                                    <span class="btn-text">Generate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="p2d-regenerate-video-btn" class="secondary-btn hidden full-width-btn">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <div class="download-buttons-row" style="display: none;">
+                                    <button id="p2d-motion-more-menu-btn" class="icon-button" aria-label="More actions" title="More actions">
+                                        <span class="material-symbols-outlined">more_horiz</span>
+                                    </button>
+                                    <div id="p2d-motion-more-menu" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 200px; overflow: hidden; z-index: 20;">
+                                        <button id="p2d-motion-more-regenerate-prompt" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">refresh</span> Recreate Prompt
+                                        </button>
+                                        <button id="p2d-motion-more-regenerate-video" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">refresh</span> Recreate Video
+                                        </button>
+                                        <button id="p2d-convert-to-gif-btn" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">gif</span> Convert to GIF
+                                        </button>
+                                        <button id="p2d-convert-to-webm-btn" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">movie</span> Convert to WebM
+                                        </button>
+                                        <button id="p2d-convert-to-webp-btn" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">image</span> Convert to WebP
+                                        </button>
+                                    </div>
+                                    <a href="#" id="p2d-download-gif-btn" class="secondary-btn hidden" download>
+                                        <span class="material-symbols-outlined">download</span> GIF
+                                    </a>
+                                    <a href="#" id="p2d-download-webm-btn" class="secondary-btn hidden" download>
+                                        <span class="material-symbols-outlined">download</span> WebM
+                                    </a>
+                                    <a href="#" id="p2d-download-webp-btn" class="secondary-btn hidden" download>
+                                        <span class="material-symbols-outlined">download</span> WebP
+                                    </a>
+                                    <a href="#" id="p2d-download-video-btn" class="secondary-btn hidden" download>
+                                        <span class="material-symbols-outlined">download</span> MP4
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- History Tab Content -->
+                        <div class="details-tab-content hidden" data-tab-content="history">
+                            <div id="p2d-details-history-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: var(--spacing-5); overflow-y: auto;">
+                                <!-- History items will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+      </div>
+      
+      <div id="page-id-3d" class="page-container hidden">
+        <h1 class="page-title-mobile">3D Studio</h1>
+        <div class="image-gen-container">
+            <div class="image-gen-controls">
+                <div class="controls-scroll-area">
+                    <div class="control-card history-panel hidden">
+                        <div class="history-header">
+                            <h3>History</h3>
+                            <div class="history-actions">
+                                <div class="history-nav-controls">
+                                    <button id="history-back-btn" class="icon-button" aria-label="Previous">
+                                        <span class="material-symbols-outlined">arrow_back</span>
+                                    </button>
+                                    <span id="history-counter">0 / 0</span>
+                                    <button id="history-forward-btn" class="icon-button" aria-label="Next">
+                                        <span class="material-symbols-outlined">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-list-container">
+                            <ul id="history-list"></ul>
+                            <div id="history-placeholder" class="hidden">
+                                <p>Your generated images will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-card">
+                        <div class="prompt-card-header">
+                            <h3>Prompt</h3>
+                        </div>
+                        <input type="text" id="image-prompt-subject-input" class="form-input-sm" placeholder="ex. 당근을 손에 들고있는 토끼">
+
+
+                        <!-- Generate Button -->
+                        <button id="image-generate-btn" class="primary-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span class="btn-text">Generate</span>
+                            <div class="btn-loader"></div>
+                        </button>
+                        
+                    </div>
+                    <!-- Prompt Detail & Options Card -->
+                    <div class="control-card">
+                        <div class="detail-group">
+                            <h3 class="options-title">Options</h3>
+                            <div class="options-group p3d-options-group">
+                            <div class="shadow-toggle-control">
+                                <label for="shadow-toggle-3d">Add Shadow</label>
+                                <label class="toggle-switch">
+                                  <input type="checkbox" id="shadow-toggle-3d">
+                                  <span class="toggle-slider"></span>
+                                </label>
+                            </div>
+                            <div class="filter-group">
+                              <label for="background-color-picker-3d">BG Color</label>
+                              <div class="input-with-suffix color-input">
+                                <div class="input-swatch">
+                                  <input type="color" id="background-color-picker-3d" value="#FFFFFF" class="color-swatch-input" />
+                                </div>
+                                <span class="color-value">#FFFFFF</span>
+                              </div>
+                            </div>
+                            <div class="filter-group">
+                              <label for="object-color-picker-3d">Main Color</label>
+                              <div class="input-with-suffix color-input">
+                                <div class="input-swatch">
+                                  <input type="color" id="object-color-picker-3d" value="#2962FF" class="color-swatch-input" />
+                                </div>
+                                <span class="color-value">#2962FF</span>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="detail-group">
+                            <div class="prompt-card-header">
+                                <h3>Prompt Detail</h3>
+                            </div>
+                            <textarea id="image-prompt-display" readonly></textarea>
+                        </div>
+                        </div>
+                    </div>
+                    <!-- 3. Reference Images Accordion Card -->
+                    <div class="control-card">
+                        <div class="accordion">
+                            <div class="accordion-header" data-accordion="3d-reference">
+                                <h3>Reference Images</h3>
+                                <span class="material-symbols-outlined accordion-icon">expand_more</span>
+                            </div>
+                            <div class="accordion-content" id="3d-reference-content">
+                                <div id="edit-reference-image-container-3d" class="reference-image-container">
+                            <div class="image-drop-zone reference-drop-zone" data-index="0">
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 1">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 1"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                            <div class="image-drop-zone reference-drop-zone" data-index="1">
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 2">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 2"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                            <div class="image-drop-zone reference-drop-zone" data-index="2">
+                                <div class="drop-zone-prompt"><span class="material-symbols-outlined">add_photo_alternate</span><p>Drop or click</p></div>
+                                <img class="style-image-preview hidden" alt="Reference image 3">
+                                <button class="remove-style-image-btn icon-button hidden" aria-label="Remove image 3"><span class="material-symbols-outlined">delete</span></button>
+                            </div>
+                                </div>
+                                <input type="file" id="edit-reference-image-input-3d" class="hidden" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 4. Image Library Accordion Card -->
+                    <div class="control-card">
+                        <div class="accordion">
+                            <div class="accordion-header" data-accordion="3d-library">
+                                <h3>Image Library</h3>
+                                <span class="material-symbols-outlined accordion-icon">expand_more</span>
+                            </div>
+                            <div class="accordion-content" id="3d-library-content">
+                                <div id="image-library-container" class="image-library-container">
+                                    <div id="image-library-placeholder">
+                                        <p>Your saved images will appear here.</p>
+                                    </div>
+                                    <div id="image-library-list" class="image-library-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="image-gen-results">
+                <div class="result-container">
+                    <div id="result-item-main" class="result-item" tabindex="0">
+                        <div class="result-item-content">
+                            <div class="result-content-header hidden">
+                                <div class="preview-switcher">
+                                    <button class="preview-tab-item active" data-tab="image">Image</button>
+                                    <button class="preview-tab-item" data-tab="video">Motion</button>
+                                </div>
+                                <div class="result-actions">
+                                    <button id="toggle-details-panel-btn" class="icon-button" aria-label="Toggle details panel">
+                                        <span class="material-symbols-outlined">info</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="result-media-container" id="result-media-container-3d">
+                                <div id="result-idle-placeholder" class="result-placeholder-content" style="display: flex; justify-content: center; align-items: center; height: 100%; background: #ffffff; position: relative; overflow: hidden;">
+                                    <div id="animated-samples-container" style="position: absolute; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                                        <!-- Images will be loaded dynamically from assets_3d_images.json -->
+                                    </div>
+                                </div>
+                                <div class="result-placeholder hidden">
+                                    <div class="result-loading">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span class="loader-text">Generating...</span>
+                                    </div>
+                                    <div class="result-error">
+                                        <span class="material-symbols-outlined">error</span>
+                                        <p>Generation Failed</p>
+                                        <button id="retry-generate-btn" class="secondary-btn">Try Again</button>
+                                    </div>
+                                </div>
+                                <div id="motion-prompt-placeholder" class="result-placeholder-content hidden">
+                                    <span class="material-symbols-outlined motion-placeholder-icon">movie</span>
+                                    <p class="motion-placeholder-title">Ready to bring it to life?</p>
+                                    <p>Generate a motion prompt to create a video from this image.</p>
+                                    <button id="generate-motion-from-preview-btn" class="secondary-btn motion-generate-btn">
+                                      <span class="material-symbols-outlined">animation</span>
+                                      Generate Motion
+                                    </button>
+                                </div>
+                                <img src="" alt="Generated 3D image" class="result-image hidden">
+                                <video src="" class="result-video hidden" controls loop autoplay muted playsinline></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside id="image-details-panel" class="details-panel hidden">
+                <div class="details-panel-content">
+                    <header class="details-panel-header">
+                        <h2>Details</h2>
+                        <button id="details-close-btn" class="icon-button" aria-label="Close details">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </header>
+                    <nav class="details-panel-tabs">
+                        <button class="tab-item active" data-tab="detail">Detail</button>
+                        <button class="tab-item" data-tab="motion">Motion</button>
+                        <button class="tab-item" data-tab="history">History</button>
+                    </nav>
+                    <div class="details-panel-body">
+                        <div class="details-tab-content active" data-tab-content="detail">
+                            <div class="details-content-scroll">
+                                <div class="details-preview" id="details-preview-container-3d">
+                                    <img id="details-preview-image" src="" alt="Details preview">
+                                    <label class="checkerboard-toggle" id="details-preview-checkerboard-toggle-3d" style="display: none;">
+                                        <input type="checkbox" id="details-preview-checkerboard-checkbox-3d" checked>
+                                        <span>Show checkerboard</span>
+                                    </label>
+                                </div>
+                                <div style="display: flex; flex-direction: column; gap: var(--spacing-3);">
+                                    <h3 style="font-size: 16px; font-weight: 600; margin: 0;">Fix the image</h3>
+                                    <div class="details-fix-section">
+                                    <div id="3d-fix-content" class="options-group">
+                                    <!-- Color Inputs Group -->
+                                    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: var(--spacing-3); align-items: center;">
+                                            <label style="font-size: 14px; font-weight: 500;">BG Color</label>
+                                            <div class="input-with-suffix color-input">
+                                              <div class="input-swatch">
+                                                <input type="color" id="details-background-color-picker-3d" value="#FFFFFF" class="color-swatch-input" />
+                                              </div>
+                                              <span class="color-value">#FFFFFF</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: var(--spacing-3); align-items: center;">
+                                            <label style="font-size: 14px; font-weight: 500;">Main Color</label>
+                                            <div class="input-with-suffix color-input">
+                                              <div class="input-swatch">
+                                                <input type="color" id="details-object-color-picker-3d" value="#2962FF" class="color-swatch-input" />
+                                              </div>
+                                              <span class="color-value">#2962FF</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons - Vertical Layout -->
+                                    <div style="display: flex; flex-direction: column; gap: var(--spacing-2);">
+                                        <button id="details-remove-bg-btn" class="secondary-btn" style="width: 100%;">
+                                            <span class="btn-text">Remove BG</span>
+                                            <div class="btn-loader"></div>
+                                        </button>
+                                        <button id="details-fix-btn" class="primary-btn" style="width: 100%;" disabled>
+                                            <span class="material-symbols-outlined">autorenew</span>
+                                            <span class="btn-text">Recreate</span>
+                                            <div class="btn-loader"></div>
+                                        </button>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="details-actions image-details-actions">
+                                <button id="details-more-menu-btn" class="icon-button" aria-label="More actions" title="More actions">
+                                    <span class="material-symbols-outlined">more_horiz</span>
+                                </button>
+                                <div id="details-more-menu" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 200px; overflow: hidden; z-index: 20;">
+                                    <button id="details-more-upscale" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">photo_size_select_actual</span> Upscale
+                                    </button>
+                                    <button id="details-more-copy" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">content_copy</span> Copy Prompt
+                                    </button>
+                                    <button id="details-more-delete" class="secondary-btn danger" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">delete</span> Delete
+                                    </button>
+                                </div>
+                                <a href="#" id="details-download-btn" class="secondary-btn" download style="flex: 1;">
+                                    <span class="material-symbols-outlined">download</span> Download
+                                </a>
+                            </div>
+                        </div>
+                        <div class="details-tab-content hidden" data-tab-content="motion">
+                            <div class="motion-fixed-header">
+                                <div class="motion-thumbnail-container">
+                                    <img id="motion-thumbnail-image" src="" alt="Motion thumbnail">
+                                    <div class="motion-thumbnail-info">
+                                        <span id="motion-thumbnail-label"></span>
+                                        <span class="motion-thumbnail-desc">Ready for animation</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="motion-scroll-content">
+                                <div class="video-result-container hidden" id="motion-video-container">
+                                    <video id="motion-video-player" controls loop autoplay muted playsinline></video>
+                                    <div id="motion-video-loader" class="result-loading hidden">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span id="motion-gen-status-text" class="loader-text">Generating video...</span>
+                                    </div>
+                                </div>
+                                <div id="motion-reference-image-container" class="reference-image-container">
+                                  <div class="image-drop-zone reference-drop-zone" data-index="0">
+                                    <span class="slot-title">First Frame</span>
+                                    <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                    <img class="style-image-preview hidden" alt="First frame reference image">
+                                    <button class="remove-style-image-btn icon-button hidden" aria-label="Remove First Frame"><span class="material-symbols-outlined">delete</span></button>
+                                  </div>
+                                  <div class="image-drop-zone reference-drop-zone" data-index="1">
+                                    <span class="slot-title">Last Frame</span>
+                                    <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                    <img class="style-image-preview hidden" alt="Last frame reference image">
+                                    <button class="remove-style-image-btn icon-button hidden" aria-label="Remove Last Frame"><span class="material-symbols-outlined">delete</span></button>
+                                  </div>
+                                </div>
+                                <input type="file" id="motion-reference-image-input" class="hidden" accept="image/*">
+                                <div class="control-card" style="padding: 0;">
+                                    <h3>Model Selection</h3>
+                                    <div class="segmented-control" id="motion-model-select">
+                                        <input type="radio" id="model-fast" name="motion-model" value="veo-3.1-fast-generate-preview" checked />
+                                        <label for="model-fast">Veo 3.1 Fast</label>
+                                        <input type="radio" id="model-hq" name="motion-model" value="veo-3.1-generate-preview" />
+                                        <label for="model-hq">Veo 3.1</label>
+                                    </div>
+                                </div>
+                                <div id="motion-prompt-output" class="hidden">
+                                    <div class="control-card">
+                                        <label for="motion-prompt-final-english">Final Prompt</label>
+                                        <textarea id="motion-prompt-final-english" rows="4"></textarea>
+                                    </div>
+                                    <div class="control-card">
+                                        <label>Description (Korean)</label>
+                                        <div id="motion-prompt-korean" class="description-box"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="details-actions">
+                                <button id="generate-motion-prompt-btn" class="primary-btn">
+                                    <span class="material-symbols-outlined">animation</span>
+                                    <span class="btn-text">Generate Motion Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="regenerate-motion-prompt-btn" class="secondary-btn hidden">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Motion Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="generate-video-btn" class="primary-btn hidden">
+                                    <span class="material-symbols-outlined">movie</span>
+                                    <span class="btn-text">Generate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="regenerate-video-btn" class="secondary-btn hidden">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <!-- Video generated state: More menu + Download -->
+                                <div id="motion-download-row" class="motion-download-row hidden">
+                                    <button id="motion-more-menu-btn" class="icon-button" aria-label="More actions" title="More actions">
+                                        <span class="material-symbols-outlined">more_horiz</span>
+                                    </button>
+                                    <div id="motion-more-menu" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 200px; overflow: hidden; z-index: 20;">
+                                        <button id="motion-more-regenerate-prompt" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">refresh</span> Recreate Motion Prompt
+                                        </button>
+                                        <button id="motion-more-regenerate-video" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                            <span class="material-symbols-outlined">refresh</span> Recreate Video
+                                        </button>
+                                    </div>
+                                    <a href="#" id="download-video-btn" class="secondary-btn" download>
+                                        <span class="material-symbols-outlined">download</span> Download Video
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="details-tab-content hidden" data-tab-content="history">
+                            <div id="3d-details-history-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: var(--spacing-5); overflow-y: auto;">
+                                <!-- History items will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+      </div>
+      
+      <div id="page-image" class="page-container hidden">
+        <div class="image-gen-container">
+            <div class="image-gen-controls">
+                <div class="controls-scroll-area">
+                    <div class="control-card history-panel hidden" id="image-studio-history-panel">
+                        <div class="history-header">
+                            <h3>History</h3>
+                            <div class="history-actions">
+                                <div class="history-nav-controls">
+                                    <button id="history-back-btn-image" class="icon-button" aria-label="Previous">
+                                        <span class="material-symbols-outlined">arrow_back</span>
+                                    </button>
+                                    <span id="history-counter-image">0 / 0</span>
+                                    <button id="history-forward-btn-image" class="icon-button" aria-label="Next">
+                                        <span class="material-symbols-outlined">arrow_forward</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="history-list-container">
+                            <ul id="history-list-image"></ul>
+                            <div id="history-placeholder-image" class="hidden">
+                                <p>Your generated images will appear here.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-card">
+                        <div class="prompt-card-header">
+                            <h3>Prompt</h3>
+                        </div>
+                        <input type="text" id="image-prompt-subject-input-image" placeholder="ex. 파스타 먹고 있는 캐릭터" style="width: 100%;">
+
+                        <!-- Generate Button -->
+                        <button id="image-generate-btn-image" class="primary-btn" disabled style="opacity: 0.5; cursor: not-allowed;">
+                            <span class="material-symbols-outlined">auto_awesome</span>
+                            <span class="btn-text">Generate</span>
+                            <div class="btn-loader"></div>
+                        </button>
+                    </div>
+
+                    <div class="control-card">
+                        <div class="prompt-card-header temperature-header">
+                            <h3>Temperature</h3>
+                            <span id="image-temperature-label" class="temperature-value">1.0</span>
+                        </div>
+                        <div class="slider-group">
+                            <input type="range" id="image-temperature-input-image" min="0.1" max="1" step="0.1" value="1">
+                            <div class="slider-meta">
+                                <span>0.1</span>
+                                <span>1.0</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Reference Images Container -->
+                    <div id="image-studio-reference-container"></div>
+                    
+                    <!-- Add Image Button -->
+                    <div class="control-card hidden" id="add-reference-image-card">
+                        <button id="add-reference-image-btn" class="secondary-btn" style="width: 100%;">
+                            <span class="material-symbols-outlined">add</span>
+                            <span class="btn-text">Add Reference Image</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="image-gen-results">
+                <div class="result-container">
+                    <div id="result-item-main-image" class="result-item" tabindex="0">
+                        <div class="result-item-content">
+                            <div class="result-content-header-image">
+                                <div class="preview-switcher">
+                                    <button class="preview-tab-item active" data-tab="image">
+                                        Image
+                                    </button>
+                                    <button class="preview-tab-item" data-tab="motion">
+                                        Motion
+                                    </button>
+                                </div>
+                                <div class="result-actions">
+                                    <button id="toggle-details-panel-btn-image" class="icon-button" aria-label="Toggle details panel">
+                                        <span class="material-symbols-outlined">info</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="result-media-container">
+                                <div id="result-idle-placeholder-image" class="result-placeholder-content" style="display: flex; justify-content: center; align-items: center; height: 100%; background: #ffffff; position: relative; overflow: hidden;">
+                                    <div id="animated-samples-container-image" style="position: absolute; display: flex; justify-content: center; align-items: center; width: 100%; height: 100%;">
+                                        <!-- Images will be loaded dynamically from assets/image folder -->
+                                    </div>
+                                </div>
+                                <div class="result-placeholder hidden">
+                                    <div class="result-loading">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span class="loader-text">Generating...</span>
+                                    </div>
+                                    <div class="result-error">
+                                        <span class="material-symbols-outlined">error</span>
+                                        <p>Generation Failed</p>
+                                        <button id="retry-generate-btn-image" class="secondary-btn">Try Again</button>
+                                    </div>
+                                </div>
+                                <div id="motion-prompt-placeholder-image" class="result-placeholder-content hidden">
+                                    <span class="material-symbols-outlined motion-placeholder-icon">movie</span>
+                                    <p class="motion-placeholder-title">Ready to bring it to life?</p>
+                                    <p>Generate a motion prompt to create a video from this image.</p>
+                                    <button id="generate-motion-from-preview-btn-image" class="secondary-btn motion-generate-btn">
+                                      <span class="material-symbols-outlined">animation</span>
+                                      Generate Motion
+                                    </button>
+                                </div>
+                                <img id="result-image-image" src="" alt="Generated image" class="result-image-image hidden">
+                                <video id="result-video-image" src="" class="result-video-image hidden" controls loop autoplay muted playsinline></video>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <aside id="image-details-panel-image" class="details-panel hidden">
+                <div class="details-panel-content">
+                    <header class="details-panel-header">
+                        <h2>Details</h2>
+                        <button id="details-close-btn-image" class="icon-button" aria-label="Close details">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </header>
+                    <nav class="details-panel-tabs">
+                        <button class="tab-item active" data-tab="detail">Detail</button>
+                        <button class="tab-item" data-tab="motion">Motion</button>
+                        <button class="tab-item" data-tab="history">History</button>
+                    </nav>
+                    <div class="details-panel-body">
+                        <div class="details-tab-content active" data-tab-content="detail">
+                            <div class="details-content-scroll">
+                                <div class="details-preview">
+                                    <img id="details-preview-image-image" src="" alt="Details preview">
+                                </div>
+                                
+                                <!-- Fix the image section -->
+                                <div style="display: flex; flex-direction: column; gap: var(--spacing-3);">
+                                    <h3 style="font-size: 16px; font-weight: 600; margin: 0;">Fix the image</h3>
+                                    <div class="details-fix-section">
+                                    <div id="image-fix-content" class="options-group">
+                                    <!-- Color Inputs Group -->
+                                    <div style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 16px;">
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: var(--spacing-3); align-items: center;">
+                                            <label style="font-size: 14px; font-weight: 500;">BG Color</label>
+                                            <div class="input-with-suffix color-input">
+                                              <div class="input-swatch">
+                                                <input type="color" id="details-background-color-picker-image" value="#FFFFFF" class="color-swatch-input" />
+                                              </div>
+                                              <span class="color-value">#FFFFFF</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div style="display: grid; grid-template-columns: 80px 1fr; gap: var(--spacing-3); align-items: center;">
+                                            <label style="font-size: 14px; font-weight: 500;">Main Color</label>
+                                            <div class="input-with-suffix color-input">
+                                              <div class="input-swatch">
+                                                <input type="color" id="details-object-color-picker-image" value="#2962FF" class="color-swatch-input" />
+                                              </div>
+                                              <span class="color-value">#2962FF</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Action Buttons - Vertical Layout -->
+                                    <div style="display: flex; flex-direction: column; gap: var(--spacing-2);">
+                                        <button id="details-zoom-out-1-5x-btn-image" class="secondary-btn" style="width: 100%;">
+                                            <span class="material-symbols-outlined">zoom_out</span>
+                                            <span class="btn-text">Zoom Out 2x</span>
+                                            <div class="btn-loader"></div>
+                                        </button>
+                                        <button id="details-fix-btn-image" class="primary-btn" style="width: 100%;" disabled>
+                                            <span class="material-symbols-outlined">autorenew</span>
+                                            <span class="btn-text">Recreate</span>
+                                            <div class="btn-loader"></div>
+                                        </button>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </div>
+                            
+                            <div class="details-actions">
+                                <button id="details-more-menu-btn-image" class="icon-button" aria-label="More actions" title="More actions">
+                                    <span class="material-symbols-outlined">more_horiz</span>
+                                </button>
+                                <!-- More menu dropdown -->
+                                <div id="details-more-menu-image" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 200px; overflow: hidden; z-index: 20;">
+                                    <button id="details-more-upscale-image" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">photo_size_select_actual</span> Upscale
+                                    </button>
+                                    <button id="details-more-delete-image" class="secondary-btn danger" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">delete</span> Delete
+                                    </button>
+                                </div>
+                                <a href="#" id="details-download-btn-image" class="secondary-btn" download style="flex: 1;">
+                                    <span class="material-symbols-outlined">download</span>
+                                    <span class="btn-text">Download</span>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- History Tab Content -->
+                        <div class="details-tab-content hidden" data-tab-content="history">
+                            <div id="image-details-history-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 12px; padding: var(--spacing-5); overflow-y: auto;">
+                                <!-- History items will be rendered here -->
+                            </div>
+                        </div>
+                        
+                        <div class="details-tab-content hidden" data-tab-content="motion">
+                            <div class="motion-fixed-header">
+                                <div class="motion-thumbnail-container">
+                                    <img id="motion-thumbnail-image-image" src="" alt="Motion thumbnail">
+                                    <div class="motion-thumbnail-info">
+                                        <span id="motion-thumbnail-label-image"></span>
+                                        <span class="motion-thumbnail-desc">Ready for animation</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="motion-scroll-content">
+                                <div class="video-result-container hidden" id="motion-video-container-image">
+                                    <video id="motion-video-player-image" controls loop autoplay muted playsinline></video>
+                                    <div id="motion-video-loader-image" class="result-loading hidden">
+                                        <div class="loader">
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                            <div class="particle"></div>
+                                        </div>
+                                        <span id="motion-gen-status-text-image" class="loader-text">Generating video...</span>
+                                    </div>
+                                </div>
+                                <div id="motion-reference-image-container-image" class="reference-image-container">
+                                    <div class="image-drop-zone reference-drop-zone" data-index="0">
+                                        <span class="slot-title">First Frame</span>
+                                        <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                        <img class="style-image-preview hidden" alt="First frame reference image">
+                                        <button class="remove-style-image-btn icon-button hidden" aria-label="Remove First Frame"><span class="material-symbols-outlined">delete</span></button>
+                                    </div>
+                                    <div class="image-drop-zone reference-drop-zone" data-index="1">
+                                        <span class="slot-title">Last Frame</span>
+                                        <div class="drop-zone-prompt"><p style="font-size:12px">Drop or click</p></div>
+                                        <img class="style-image-preview hidden" alt="Last frame reference image">
+                                        <button class="remove-style-image-btn icon-button hidden" aria-label="Remove Last Frame"><span class="material-symbols-outlined">delete</span></button>
+                                    </div>
+                                </div>
+                                <input type="file" id="motion-reference-image-input-image" class="hidden" accept="image/*">
+                                <div class="control-card" style="padding: 0;">
+                                    <h3>Model Selection</h3>
+                                    <div class="segmented-control" id="motion-model-select-image">
+                                        <input type="radio" id="model-fast-image" name="motion-model-image" value="veo-3.1-fast-generate-preview" checked />
+                                        <label for="model-fast-image">Veo 3.1 Fast</label>
+                                        <input type="radio" id="model-hq-image" name="motion-model-image" value="veo-3.1-generate-preview" />
+                                        <label for="model-hq-image">Veo 3.1</label>
+                                    </div>
+                                </div>
+                                <div id="motion-prompt-output-image" class="hidden">
+                                    <div class="control-card">
+                                        <label for="motion-prompt-final-english-image">Final Prompt</label>
+                                        <textarea id="motion-prompt-final-english-image" rows="4"></textarea>
+                                    </div>
+                                    <div class="control-card">
+                                        <label>Description (Korean)</label>
+                                        <div id="motion-prompt-korean-image" class="description-box"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="details-actions">
+                                <button id="generate-motion-prompt-btn-image" class="primary-btn">
+                                    <span class="material-symbols-outlined">animation</span>
+                                    <span class="btn-text">Generate Motion Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="regenerate-motion-prompt-btn-image" class="secondary-btn hidden">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Prompt</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="generate-video-btn-image" class="primary-btn hidden">
+                                    <span class="material-symbols-outlined">movie</span>
+                                    <span class="btn-text">Generate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <button id="regenerate-video-btn-image" class="secondary-btn hidden">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                    <span class="btn-text">Recreate Video</span>
+                                    <div class="btn-loader"></div>
+                                </button>
+                                <div id="motion-more-menu-image" class="kebab-menu hidden" style="position: absolute; left: 0; bottom: 56px; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--border-radius-md); box-shadow: 0 8px 24px rgba(0,0,0,0.12); width: 200px; overflow: hidden; z-index: 20;">
+                                    <button id="motion-more-regenerate-prompt-image" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">refresh</span> Recreate Motion Prompt
+                                    </button>
+                                    <button id="motion-more-regenerate-video-image" class="secondary-btn" style="width: 100%; justify-content: flex-start; gap: var(--spacing-2); border: none; background: transparent;">
+                                        <span class="material-symbols-outlined">refresh</span> Recreate Video
+                                    </button>
+                                </div>
+                                <div id="motion-download-row-image" class="motion-download-row hidden">
+                                    <button id="motion-more-menu-btn-image" class="icon-button" aria-label="More actions" title="More actions">
+                                        <span class="material-symbols-outlined">more_horiz</span>
+                                    </button>
+                                    <a href="#" id="download-video-btn-image" class="secondary-btn" download>
+                                        <span class="material-symbols-outlined">download</span> Download Video
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+      </div>
+      
+      <!-- Image Modal -->
+      <div id="image-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content">
+            <button id="image-modal-close-btn" class="icon-button" aria-label="Close image view">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+            <img id="image-modal-view" src="" alt="Enlarged 3D icon">
+            <div class="image-modal-actions">
+                <button id="image-modal-regenerate-btn" class="secondary-btn">
+                    <span class="material-symbols-outlined">refresh</span> Recreate
+                </button>
+                <a href="#" id="image-modal-download-btn" class="secondary-btn" download>
+                    <span class="material-symbols-outlined">download</span> Download
+                </a>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Motion Category Modal -->
+      <div id="motion-category-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content">
+            <header class="modal-header">
+                <h2 class="modal-title">모션 스타일 선택</h2>
+                <button id="motion-category-close-btn" class="icon-button" aria-label="모션 스타일 선택 닫기">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </header>
+            <div id="motion-category-list"></div>
+        </div>
+      </div>
+
+      <!-- 3D Image Generation Loader Modal -->
+      <div id="image-generation-loader-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content loader-modal-content" style="width: 240px; height: 160px; text-align: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: var(--spacing-5); height: 100%;">
+              <div class="loader">
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+              </div>
+              <p id="image-generation-loader-text" style="color: var(--text-secondary);">Generating your 3D image...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Main Page Generation Loader Modal -->
+      <div id="main-generation-loader-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content loader-modal-content" style="width: 240px; height: 160px; text-align: center;">
+          <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: var(--spacing-5); height: 100%;">
+              <div class="loader">
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+                  <div class="particle"></div>
+              </div>
+              <p id="main-generation-loader-text" style="color: var(--text-secondary);">Generating your image...</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Image Studio Text Generation Modal -->
+      <div id="image-studio-text-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="width: 800px; height: 600px; max-width: 800px; max-height: 600px; padding: var(--spacing-6); background-color: var(--surface-color); border-radius: var(--border-radius-lg); display: flex; flex-direction: column;">
+          <header class="image-studio-modal-header">
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text-primary);">이미지 생성</h3>
+            <button id="image-studio-text-modal-close-btn" class="icon-button" aria-label="Close">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </header>
+          <textarea id="image-studio-text-input" placeholder="이미지 생성 프롬프트를 입력하세요..." style="flex: 1; width: 100%; padding: var(--spacing-3); margin-bottom: var(--spacing-4); border-radius: var(--border-radius-md); border: 1px solid var(--border-color); font-family: var(--font-family); resize: none; background-color: var(--bg-color); color: var(--text-primary); font-size: 14px; min-height: 0;"></textarea>
+          <div style="display: flex; justify-content: flex-end; gap: var(--spacing-2);">
+            <button id="image-studio-text-cancel-btn" class="secondary-btn">취소</button>
+            <button id="image-studio-text-generate-btn" class="primary-btn">생성</button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Video Generation Loader Modal -->
+      <div id="video-generation-loader-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content loader-modal-content" style="width: 240px; height: 160px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: var(--spacing-4); height: 100%;">
+                <div class="loader">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+                <p id="video-loader-message" style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin: 0;">Generating Video...</p>
+            </div>
+        </div>
+      </div>
+      
+      <!-- 2D Studio Loader Modal -->
+      <div id="p2d-loader-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content loader-modal-content" style="width: 240px; height: 160px; text-align: center;">
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: var(--spacing-5); height: 100%;">
+                <div class="loader">
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                    <div class="particle"></div>
+                </div>
+                <p id="p2d-loader-message" style="color: var(--text-secondary);">Processing...</p>
+            </div>
+        </div>
+      </div>
+      
+      <!-- 2D Studio: SVG Preview Modal -->
+      <div id="p2d-svg-preview-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="width: 800px; max-height: 90vh; padding: var(--spacing-5);">
+            <header class="image-studio-modal-header">
+                <h3>SVG Preview</h3>
+                <button id="p2d-svg-preview-close-btn" class="icon-button" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </header>
+            
+            <!-- Tabs -->
+            <div class="details-panel-tabs">
+                <button class="tab-item active" data-tab="preview">Preview</button>
+                <button class="tab-item" data-tab="code">Code</button>
+            </div>
+            
+            <!-- Tab Content -->
+            <div class="svg-tabs-body">
+                <!-- Preview Tab -->
+                <div class="details-tab-content" data-tab-content="preview">
+                    <div class="svg-tab-content">
+                        <div id="p2d-svg-preview-container" class="svg-preview-area">
+                            <label class="checkerboard-toggle svg-checkerboard-toggle" id="p2d-svg-preview-toggle">
+                                <input type="checkbox" id="p2d-svg-bg-toggle" checked>
+                                <span>Checkerboard</span>
+                            </label>
+                            <div id="p2d-svg-preview-content"></div>
+                        </div>
+                        <div class="svg-modal-actions">
+                            <button id="p2d-download-svg-btn-preview" class="secondary-btn">
+                                <span class="material-symbols-outlined">download</span> Download .svg
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Code Tab -->
+                <div class="details-tab-content hidden" data-tab-content="code">
+                    <div class="svg-tab-content">
+                        <textarea id="p2d-svg-code-view" class="svg-code-textarea" readonly></textarea>
+                        <div class="svg-modal-actions">
+                            <button id="p2d-copy-svg-code-btn" class="secondary-btn">
+                                <span class="material-symbols-outlined">content_copy</span> Copy SVG
+                            </button>
+                            <button id="p2d-download-svg-btn" class="secondary-btn">
+                                <span class="material-symbols-outlined">download</span> Download .svg
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <!-- 2D Studio: Compare Modal -->
+      <!-- 3D Studio Compare Modal -->
+      <div id="compare-modal-3d" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="width: 900px; max-height: 90vh; padding: var(--spacing-5);">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Compare View</h3>
+                <button id="compare-close-btn-3d" class="icon-button" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </header>
+            <div style="position: relative; background: #f5f5f5; border-radius: var(--border-radius-md); overflow: hidden;">
+                <div style="position: relative; width: 100%; height: 500px;">
+                    <!-- After image as base layer (left side) -->
+                    <div style="position: absolute; inset: 0; z-index: 1;">
+                        <label id="compare-left-label-3d" style="position: absolute; top: 50%; right: calc(50% + 32px); transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; padding: var(--spacing-2) var(--spacing-3); border-radius: 20px; font-size: 13px; z-index: 5; font-weight: 600; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">After</label>
+                        <img id="compare-current-3d" src="" alt="After" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    </div>
+                    <!-- Before image clipped by divider (right side) -->
+                    <div style="position: absolute; inset: 0; z-index: 2; overflow: hidden;">
+                        <label style="position: absolute; top: 50%; left: calc(50% + 32px); transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; padding: var(--spacing-2) var(--spacing-3); border-radius: 20px; font-size: 13px; z-index: 5; font-weight: 600; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">Before</label>
+                        <img id="compare-original-3d" src="" alt="Before" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    </div>
+                    <!-- Draggable divider -->
+                    <div id="compare-divider-3d" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; cursor: ew-resize; z-index: 4; box-shadow: 0 0 4px rgba(0,0,0,0.2);">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1);">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-primary); margin: 0 -2px;">chevron_left</span>
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-primary); margin: 0 -2px;">chevron_right</span>
+                        </div>
+                    </div>
+                    <!-- Invisible slider for drag handle -->
+                    <input type="range" id="compare-slider-3d" min="0" max="100" value="50" style="position: absolute; top: 50%; left: 0; right: 0; width: 100%; z-index: 5; opacity: 0; cursor: ew-resize; transform: translateY(-50%);">
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <div id="p2d-compare-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="width: 900px; max-height: 90vh; padding: var(--spacing-5);">
+            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-4);">
+                <h3 style="margin: 0; font-size: 20px; font-weight: 600;">Compare View</h3>
+                <button id="p2d-compare-close-btn" class="icon-button" aria-label="Close">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+            </header>
+            <div style="position: relative; background: #f5f5f5; border-radius: var(--border-radius-md); overflow: hidden;">
+                <div style="position: relative; width: 100%; height: 500px;">
+                    <!-- After image as base layer (left side) -->
+                    <div style="position: absolute; inset: 0; z-index: 1;">
+                        <label id="compare-left-label-2d" style="position: absolute; top: 50%; right: calc(50% + 32px); transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; padding: var(--spacing-2) var(--spacing-3); border-radius: 20px; font-size: 13px; z-index: 5; font-weight: 600; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">After</label>
+                        <img id="p2d-compare-current" src="" alt="After" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    </div>
+                    <!-- Before image clipped by divider (right side) -->
+                    <div style="position: absolute; inset: 0; z-index: 2; overflow: hidden;">
+                        <label style="position: absolute; top: 50%; left: calc(50% + 32px); transform: translateY(-50%); background: rgba(0,0,0,0.5); color: white; padding: var(--spacing-2) var(--spacing-3); border-radius: 20px; font-size: 13px; z-index: 5; font-weight: 600; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);">Before</label>
+                        <img id="p2d-compare-original" src="" alt="Before" style="width: 100%; height: 100%; object-fit: contain; display: block;">
+                    </div>
+                    <!-- Draggable divider -->
+                    <div id="p2d-compare-divider" style="position: absolute; top: 0; bottom: 0; left: 50%; width: 2px; background: white; cursor: ew-resize; z-index: 4; box-shadow: 0 0 4px rgba(0,0,0,0.2);">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 40px; height: 40px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; gap: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.1);">
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-primary); margin: 0 -2px;">chevron_left</span>
+                            <span class="material-symbols-outlined" style="font-size: 16px; color: var(--text-primary); margin: 0 -2px;">chevron_right</span>
+                        </div>
+                    </div>
+                    <!-- Invisible slider for drag handle -->
+                    <input type="range" id="p2d-compare-slider" min="0" max="100" value="50" style="position: absolute; top: 50%; left: 0; right: 0; width: 100%; z-index: 5; opacity: 0; cursor: ew-resize; transform: translateY(-50%);">
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Upload Choice Modal -->
+      <div id="upload-choice-modal" class="image-modal-overlay hidden">
+        <div class="image-modal-content">
+          <header class="modal-header">
+              <h2 class="modal-title">Upload Content</h2>
+              <button id="upload-choice-close-btn" class="icon-button" aria-label="Close upload options">
+                  <span class="material-symbols-outlined">close</span>
+              </button>
+          </header>
+          <div id="upload-options" style="padding-top: 16px; display:flex; flex-direction:column; gap:12px;">
+            <button id="upload-from-device-btn" class="secondary-btn" style="width:100%"><span class="material-symbols-outlined">upload_file</span>Upload from device</button>
+            <button id="upload-from-url-btn" class="secondary-btn" style="width:100%"><span class="material-symbols-outlined">link</span>Upload from URL</button>
+          </div>
+          <form id="url-upload-form" class="hidden" style="display:flex; flex-direction:column; gap:16px; padding-top:16px;">
+            <input type="url" id="url-upload-input" class="rename-input" placeholder="Enter image or video URL">
+            <div class="rename-actions">
+                <button type="button" id="url-upload-cancel-btn" class="secondary-btn">Cancel</button>
+                <button type="submit" class="primary-btn">Upload</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Login Modal -->
+      <div id="login-modal-overlay" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="max-width: 400px; padding: 24px;">
+            <form id="login-modal-form">
+                <h3 style="margin-bottom: 8px;">로그인</h3>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">콘텐츠 생성을 위해 로그인이 필요합니다.</p>
+                <div style="margin-bottom: 16px;">
+                    <label for="login-email" style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500;">이메일</label>
+                    <input type="email" id="login-email" class="rename-input" placeholder="이메일을 입력하세요" required style="width: 100%;">
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label for="login-password" style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500;">비밀번호</label>
+                    <input type="password" id="login-password" class="rename-input" placeholder="비밀번호를 입력하세요" required style="width: 100%;">
+                </div>
+                <div class="rename-actions">
+                    <button type="button" id="login-modal-cancel" style="background: none; border: none; color: var(--text-primary); font-size: 14px; cursor: pointer; padding: 0; height: 40px;">취소</button>
+                    <button type="submit" class="primary-btn" style="height: 40px; font-size: 14px;">로그인</button>
+                </div>
+            </form>
+        </div>
+      </div>
+      
+      <!-- API Key Modal -->
+      <div id="api-key-modal-overlay" class="image-modal-overlay hidden">
+        <div class="image-modal-content" style="max-width: 500px; padding: 24px; display: flex; flex-direction: column; min-height: 200px;">
+            <div style="flex: 1;">
+                <h3 style="margin-bottom: 8px;">API Key</h3>
+                <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">API Key가 있어야 콘텐츠를 생성할 수 있습니다.</p>
+                <div style="margin-bottom: 16px;">
+                    <label for="api-key-display" style="display: block; margin-bottom: 8px; font-size: 14px; font-weight: 500;">API Key</label>
+                    <div style="position: relative;">
+                        <input type="text" id="api-key-display" class="rename-input" placeholder="API Key를 입력하세요" style="width: 100%; padding-right: 80px; font-family: monospace; font-size: 13px;">
+                        <button type="button" id="api-key-copy-btn" class="secondary-btn" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); height: 32px; padding: 0 12px; font-size: 12px;">복사</button>
+                    </div>
+                </div>
+                <div id="api-key-validation-status" style="margin-bottom: 16px; display: none;">
+                    <div id="api-key-validation-message" style="display: flex; align-items: center; gap: 8px; font-size: 13px; padding: 8px 12px; border-radius: 6px;">
+                        <span class="material-symbols-outlined" id="api-key-validation-icon" style="font-size: 18px;"></span>
+                        <span id="api-key-validation-text"></span>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: auto; padding-top: 16px;">
+                <button type="button" id="api-key-delete-btn" style="background: none; border: none; color: var(--text-primary); font-size: 14px; cursor: pointer; padding: 0;">키 삭제</button>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" id="api-key-verify-btn" class="secondary-btn" style="height: 40px; padding: 0 20px; font-size: 14px; display: flex; align-items: center; gap: 6px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">verified</span>
+                        <span>검증</span>
+                    </button>
+                    <button type="button" id="api-key-save-btn" class="primary-btn" style="height: 40px; padding: 0 24px; font-size: 14px;">저장</button>
+                </div>
+            </div>
+        </div>
+      </div>
+      
+      <!-- Rename Modal -->
+      <div id="rename-modal-overlay" class="image-modal-overlay hidden">
+        <div class="image-modal-content">
+            <form id="rename-modal-form">
+                <h3>Rename File</h3>
+                <input type="text" id="rename-modal-input" class="rename-input" required>
+                <div class="rename-actions">
+                    <button type="button" id="rename-modal-cancel" class="secondary-btn">Cancel</button>
+                    <button type="submit" class="primary-btn">Save</button>
+                </div>
+            </form>
+        </div>
+      </div>
+      
+      <div id="sr-announcer" class="sr-only" aria-live="polite"></div>
+    </div>
+    <script>
+      // Login Account Management
+      // 로그인 계정 설정: 여기에 이메일과 비밀번호를 설정하세요
+      const LOGIN_ACCOUNTS = [
+        { email: 'creon@kt.com', password: 'creon123' },
+        // 추가 계정을 여기에 추가할 수 있습니다
+        // { email: 'test@example.com', password: 'test123' },
+      ];
+      
+      // 또는 localStorage에서 계정 정보를 가져올 수도 있습니다
+      // localStorage에서 계정 정보 가져오기
+      function getStoredAccounts() {
+        try {
+          const stored = localStorage.getItem('loginAccounts');
+          if (stored) {
+            return JSON.parse(stored);
+          }
+        } catch (e) {
+          console.error('Failed to load stored accounts:', e);
+        }
+        return LOGIN_ACCOUNTS;
+      }
+      
+      // 계정 정보 저장하기 (선택사항)
+      function saveAccounts(accounts) {
+        try {
+          localStorage.setItem('loginAccounts', JSON.stringify(accounts));
+        } catch (e) {
+          console.error('Failed to save accounts:', e);
+        }
+      }
+      
+      // 로그인 상태 관리
+      function getLoggedInEmail() {
+        return localStorage.getItem('loggedInEmail') || '';
+      }
+      
+      function setLoggedIn(isLoggedIn, email) {
+        localStorage.setItem('isLoggedIn', isLoggedIn.toString());
+        if (email) {
+          localStorage.setItem('loggedInEmail', email);
+        }
+        updateLoginButton(isLoggedIn);
+      }
+      
+      function isLoggedIn() {
+        return localStorage.getItem('isLoggedIn') === 'true';
+      }
+      
+      function updateLoginButton(loggedIn) {
+        const loginBtn = document.getElementById('login-btn');
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const dropdownMenu = document.getElementById('profile-dropdown-menu');
+        
+        if (loginBtn) {
+          if (loggedIn) {
+            const email = getLoggedInEmail();
+            const firstLetter = email ? email.charAt(0).toUpperCase() : 'U';
+            
+            loginBtn.innerHTML = firstLetter;
+            loginBtn.style.width = '32px';
+            loginBtn.style.height = '32px';
+            loginBtn.style.padding = '0';
+            loginBtn.style.borderRadius = '6px';
+            loginBtn.style.background = 'rgba(41, 98, 255, 0.1)'; // opacity 10%
+            loginBtn.style.color = '#2962FF'; // 파란색
+            loginBtn.style.fontSize = '14px';
+            loginBtn.style.fontWeight = '500';
+            loginBtn.style.display = 'flex';
+            loginBtn.style.alignItems = 'center';
+            loginBtn.style.justifyContent = 'center';
+            loginBtn.style.cursor = 'pointer';
+            loginBtn.setAttribute('aria-label', 'Profile Menu');
+            loginBtn.setAttribute('title', 'Profile Menu');
+            
+            // 프로필 드롭다운 표시
+            if (profileDropdown) {
+              profileDropdown.classList.remove('hidden');
+            }
+          } else {
+            loginBtn.innerHTML = '로그인';
+            loginBtn.style.width = 'fit-content';
+            loginBtn.style.height = '32px';
+            loginBtn.style.background = 'var(--accent-color, #2962FF)';
+            loginBtn.style.color = 'white';
+            loginBtn.style.fontSize = '14px';
+            loginBtn.style.padding = '8px 16px';
+            loginBtn.style.borderRadius = '6px';
+            loginBtn.setAttribute('aria-label', 'Login');
+            loginBtn.setAttribute('title', 'Login');
+            
+            // 프로필 드롭다운 숨기기
+            if (profileDropdown) {
+              profileDropdown.classList.add('hidden');
+            }
+            if (dropdownMenu) {
+              dropdownMenu.classList.add('hidden');
+            }
+          }
+        }
+      }
+      
+      // 로그인 상태 및 API Key 확인 함수
+      function checkLoginAndShowModal() {
+        // 1. 로그인 체크
+        if (!isLoggedIn()) {
+          const loginModal = document.getElementById('login-modal-overlay');
+          if (loginModal) {
+            loginModal.classList.remove('hidden');
+          }
+          return false;
+        }
+        
+        // 2. API Key 체크 (로그인된 경우에만)
+        const currentApiKey = getCurrentApiKey();
+        if (!currentApiKey || currentApiKey.trim() === '') {
+          const apiKeyModal = document.getElementById('api-key-modal-overlay');
+          if (apiKeyModal) {
+            apiKeyModal.classList.remove('hidden');
+            // API Key 입력 필드에 포커스
+            const apiKeyInput = document.getElementById('api-key-display');
+            if (apiKeyInput) {
+              setTimeout(() => apiKeyInput.focus(), 100);
+            }
+          }
+          return false;
+        }
+        
+        return true;
+      }
+      
+      // Login Modal Control
+      document.addEventListener('DOMContentLoaded', function() {
+        const loginBtn = document.getElementById('login-btn');
+        const loginModal = document.getElementById('login-modal-overlay');
+        const loginCancelBtn = document.getElementById('login-modal-cancel');
+        const loginForm = document.getElementById('login-modal-form');
+        
+        // Generate 버튼들에 로그인 체크 추가 (이벤트 캡처 단계에서 처리)
+        const generateButtonIds = [
+          'generate-btn',
+          'p2d-image-generate-btn',
+          'image-generate-btn',
+          'convert-to-3d-btn',
+          'p2d-generate-motion-prompt-btn',
+          'p2d-generate-motion-from-preview-btn',
+          'p2d-generate-video-btn',
+          'regenerate-3d-btn',
+          'p2d-retry-generate-btn'
+        ];
+        
+        // 이벤트 위임을 사용하여 모든 Generate 버튼에 로그인 체크 추가
+        document.addEventListener('click', function(e) {
+          const target = e.target;
+          if (!target) return;
+          
+          // 버튼 자체 또는 버튼 내부 요소 클릭 확인
+          let button = target;
+          if (target.tagName !== 'BUTTON') {
+            button = target.closest('button');
+          }
+          
+          if (button && button.id && generateButtonIds.includes(button.id)) {
+            if (!checkLoginAndShowModal()) {
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return false;
+            }
+          }
+        }, true); // 캡처 단계에서 먼저 처리
+        
+        // 초기 로그인 상태 확인
+        if (isLoggedIn()) {
+          updateLoginButton(true);
+        }
+        
+        if (loginBtn && loginModal) {
+          // Open modal (로그인 상태가 아닐 때만)
+          loginBtn.addEventListener('click', function(e) {
+            if (isLoggedIn()) {
+              // 로그인된 상태에서는 프로필 드롭다운 토글
+              e.stopPropagation();
+              const dropdownMenu = document.getElementById('profile-dropdown-menu');
+              if (dropdownMenu) {
+                dropdownMenu.classList.toggle('hidden');
+              }
+              return;
+            }
+            loginModal.classList.remove('hidden');
+          });
+          
+          // 프로필 드롭다운 메뉴 항목 이벤트
+          const apiKeyMenuItem = document.getElementById('api-key-menu-item');
+          const logoutMenuItem = document.getElementById('logout-menu-item');
+          const dropdownMenu = document.getElementById('profile-dropdown-menu');
+          
+          if (apiKeyMenuItem) {
+            apiKeyMenuItem.addEventListener('click', function(e) {
+              e.stopPropagation();
+              // API key 모달 열기
+              const apiKeyModal = document.getElementById('api-key-modal-overlay');
+              const apiKeyDisplay = document.getElementById('api-key-display');
+              
+              if (apiKeyModal && apiKeyDisplay) {
+                // 모달을 열 때마다 현재 저장된 API key 가져오기
+                // localStorage에 저장된 값이 있으면 표시, 없으면 빈 문자열
+                // (실제 사용은 환경변수에서 가져온 기본값 사용)
+                const apiKey = getCurrentApiKey();
+                apiKeyDisplay.value = apiKey;
+                apiKeyModal.classList.remove('hidden');
+              }
+              
+              if (dropdownMenu) {
+                dropdownMenu.classList.add('hidden');
+              }
+            });
+            
+            // 호버 효과
+            apiKeyMenuItem.addEventListener('mouseenter', function() {
+              this.style.backgroundColor = 'var(--input-bg)';
+            });
+            apiKeyMenuItem.addEventListener('mouseleave', function() {
+              this.style.backgroundColor = 'transparent';
+            });
+          }
+          
+          if (logoutMenuItem) {
+            logoutMenuItem.addEventListener('click', function(e) {
+              e.stopPropagation();
+              if (confirm('로그아웃 하시겠습니까?')) {
+                setLoggedIn(false, '');
+                localStorage.removeItem('loggedInEmail');
+                if (dropdownMenu) {
+                  dropdownMenu.classList.add('hidden');
+                }
+                alert('로그아웃되었습니다.');
+              }
+            });
+            
+            // 호버 효과
+            logoutMenuItem.addEventListener('mouseenter', function() {
+              this.style.backgroundColor = 'var(--input-bg)';
+            });
+            logoutMenuItem.addEventListener('mouseleave', function() {
+              this.style.backgroundColor = 'transparent';
+            });
+          }
+          
+          // 외부 클릭 시 드롭다운 닫기
+          document.addEventListener('click', function(e) {
+            if (dropdownMenu && !dropdownMenu.contains(e.target) && e.target !== loginBtn) {
+              dropdownMenu.classList.add('hidden');
+            }
+          });
+          
+          // Close modal on cancel
+          if (loginCancelBtn) {
+            loginCancelBtn.addEventListener('click', function() {
+              loginModal.classList.add('hidden');
+              if (loginForm) loginForm.reset();
+            });
+          }
+          
+          // Close modal on overlay click
+          loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+              loginModal.classList.add('hidden');
+              if (loginForm) loginForm.reset();
+            }
+          });
+          
+          // Handle form submission
+          if (loginForm) {
+            loginForm.addEventListener('submit', function(e) {
+              e.preventDefault();
+              const email = document.getElementById('login-email').value.trim();
+              const password = document.getElementById('login-password').value;
+              
+              // 저장된 계정 정보 가져오기
+              const accounts = getStoredAccounts();
+              
+              // 계정 확인
+              const account = accounts.find(acc => acc.email === email && acc.password === password);
+              
+              if (account) {
+                // 로그인 성공
+                setLoggedIn(true, email);
+                loginModal.classList.add('hidden');
+                loginForm.reset();
+                
+                // 성공 메시지 (선택사항)
+                console.log('Login successful!');
+                alert('로그인 성공!');
+                
+                // API 키가 없으면 API Key 모달 자동으로 열기
+                const currentApiKey = getCurrentApiKey();
+                if (!currentApiKey || currentApiKey.trim() === '') {
+                  const apiKeyModal = document.getElementById('api-key-modal-overlay');
+                  if (apiKeyModal) {
+                    // 약간의 지연 후 모달 열기 (로그인 모달이 닫힌 후)
+                    setTimeout(() => {
+                      apiKeyModal.classList.remove('hidden');
+                      // API Key 입력 필드에 포커스
+                      const apiKeyInput = document.getElementById('api-key-display');
+                      if (apiKeyInput) {
+                        apiKeyInput.focus();
+                      }
+                    }, 300);
+                  }
+                }
+              } else {
+                // 로그인 실패
+                alert('이메일 또는 비밀번호가 올바르지 않습니다.');
+                console.log('Login failed:', { email });
+              }
+            });
+          }
+        }
+      });
+      
+      // API Key 관리
+      // 기본 API Key는 실제 사용 중인 환경변수에서 가져오기
+      // Vite에서는 import.meta.env를 사용하지만, index.html에서는 직접 접근 불가
+      // 따라서 빈 문자열로 시작하고, 실제 사용은 src/utils/imageGeneration.ts에서 처리
+      function getCurrentApiKey() {
+        // 1. 로그인 상태 확인 (필수)
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        if (!isLoggedIn) {
+          return '';
+        }
+        
+        // 2. localStorage에서 사용자가 설정한 API key 가져오기 (로그인 후에만)
+        const storedKey = localStorage.getItem('geminiApiKey') || localStorage.getItem('GEMINI_API_KEY');
+        if (storedKey) {
+          return storedKey;
+        }
+        
+        // 3. 로그인했지만 API 키가 없으면 빈 문자열 반환
+        return '';
+      }
+      
+      function saveApiKey(apiKey) {
+        if (apiKey && apiKey.trim()) {
+          localStorage.setItem('geminiApiKey', apiKey.trim());
+          return true;
+        }
+        return false;
+      }
+      
+      function deleteApiKey() {
+        localStorage.removeItem('geminiApiKey');
+        localStorage.removeItem('GEMINI_API_KEY');
+        console.log('API Key deleted from localStorage');
+      }
+      
+      // API Key 모달 제어
+      document.addEventListener('DOMContentLoaded', function() {
+        const apiKeyModal = document.getElementById('api-key-modal-overlay');
+        const apiKeyCopyBtn = document.getElementById('api-key-copy-btn');
+        const apiKeyDisplay = document.getElementById('api-key-display');
+        const apiKeySaveBtn = document.getElementById('api-key-save-btn');
+        const apiKeyDeleteBtn = document.getElementById('api-key-delete-btn');
+        
+        if (apiKeyModal) {
+          // 배경 클릭 시 닫기
+          apiKeyModal.addEventListener('click', function(e) {
+            if (e.target === apiKeyModal) {
+              // 닫을 때는 현재 입력된 값 유지 (저장하지 않음)
+              apiKeyModal.classList.add('hidden');
+            }
+          });
+          
+          // 저장 버튼
+          if (apiKeySaveBtn && apiKeyDisplay) {
+            apiKeySaveBtn.addEventListener('click', function() {
+              const newApiKey = apiKeyDisplay.value.trim();
+              if (newApiKey) {
+                if (saveApiKey(newApiKey)) {
+                  alert('API Key가 저장되었습니다.');
+                  apiKeyModal.classList.add('hidden');
+                } else {
+                  alert('API Key 저장에 실패했습니다.');
+                }
+              } else {
+                alert('API Key를 입력해주세요.');
+              }
+            });
+          }
+          
+          // 삭제 버튼
+          if (apiKeyDeleteBtn) {
+            apiKeyDeleteBtn.addEventListener('click', function() {
+              if (confirm('API Key를 삭제하시겠습니까?')) {
+                deleteApiKey();
+                if (apiKeyDisplay) {
+                  apiKeyDisplay.value = '';
+                }
+                alert('API Key가 삭제되었습니다.');
+                // 모달을 닫을 때 빈 값으로 유지
+                setTimeout(function() {
+                  apiKeyModal.classList.add('hidden');
+                }, 100);
+              }
+            });
+          }
+          
+          // 복사 버튼
+          if (apiKeyCopyBtn && apiKeyDisplay) {
+            apiKeyCopyBtn.addEventListener('click', function() {
+              const apiKey = apiKeyDisplay.value;
+              if (apiKey && apiKey.trim()) {
+                navigator.clipboard.writeText(apiKey).then(function() {
+                  const originalText = apiKeyCopyBtn.textContent;
+                  apiKeyCopyBtn.textContent = '복사됨!';
+                  setTimeout(function() {
+                    apiKeyCopyBtn.textContent = originalText;
+                  }, 2000);
+                }).catch(function(err) {
+                  console.error('복사 실패:', err);
+                  alert('복사에 실패했습니다.');
+                });
+              } else {
+                alert('복사할 API Key가 없습니다.');
+              }
+            });
+          }
+        }
+      });
+      
+      // 계정 설정 예시 (콘솔에서 사용 가능)
+      // localStorage.setItem('loginAccounts', JSON.stringify([
+      //   { email: 'myemail@example.com', password: 'mypassword' }
+      // ]));
+      
+      // API Key 설정 예시 (콘솔에서 사용 가능)
+      // localStorage.setItem('geminiApiKey', 'your-api-key-here');
+    </script>
+  </body>
+</html>
