@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import {
     Plus,
     Sparkles,
@@ -13,7 +13,10 @@ import {
     Library,
     ImagePlus,
     Trash2,
-    X
+    X,
+    Search,
+    ChevronRight,
+    LayoutGrid
 } from 'lucide-react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -43,6 +46,7 @@ import {
     DialogDescription,
 } from "./ui/dialog";
 import { toast } from "sonner";
+import { Badge } from "./ui/badge";
 
 const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio = '16:9', setRatio }) => {
     const isDark = theme === 'dark';
@@ -50,18 +54,34 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
     const [slideCount, setSlideCount] = useState("8");
     const [attachedFile, setAttachedFile] = useState(null);
     const [logoFile, setLogoFile] = useState(null);
-    const [primaryColor, setPrimaryColor] = useState("#3b82f6"); // Default Blue
-    const [domain, setDomain] = useState("Public"); // Default to Public (SI common)
-    const [subDomain, setSubDomain] = useState("General");
-    const [style, setStyle] = useState("Minimalist");
+    const [primaryColor, setPrimaryColor] = useState("#3b82f6");
+    const [domain, setDomain] = useState(null);
+    const [subDomain, setSubDomain] = useState(null);
+    const [style, setStyle] = useState(null);
     const [activeCategory, setActiveCategory] = useState("basic");
     const [showRefPanel, setShowRefPanel] = useState(false);
     const [referenceImages, setReferenceImages] = useState([]);
+
+    // Template filtering
+    const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("All");
 
     const fileInputRef = useRef(null);
     const templateInputRef = useRef(null);
     const logoInputRef = useRef(null);
     const refInputRef = useRef(null);
+
+    const CATEGORIES = ["All", ...new Set(TEMPLATES.filter(t => t.category).map(t => t.category))];
+
+    const filteredTemplates = useMemo(() => {
+        return TEMPLATES.filter(t => {
+            if (t.type === 'action') return false; // Hide special actions from general grid
+            const matchesSearch = t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                t.description.toLowerCase().includes(searchQuery.toLowerCase());
+            const matchesCategory = selectedCategory === "All" || t.category === selectedCategory;
+            return matchesSearch && matchesCategory;
+        });
+    }, [searchQuery, selectedCategory]);
 
     const RATIO_OPTIONS = [
         { value: '16:9', label: '16:9', desc: '프레젠테이션 & 최신 스크린' },
@@ -204,9 +224,6 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
         return SUB_DOMAIN_OPTIONS[domain] || [{ value: 'General', label: '일반' }];
     };
 
-    // Reset subDomain when domain changes (can be done in useEffect, but easier in setDomain handler if we wrapped it, but here we can just default to first option in render or handle it when passing to API. Let's add a useEffect-like behavior or just ensure we pick a valid one. Ideally, we update the setDomain usage.)
-    // Actually, simplest is to update `setDomain` calls to reset `subDomain`. But let's keep it simple.
-
     const ActiveFilterChips = (
         <>
             {logoFile && (
@@ -227,35 +244,35 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                 </div>
             )}
 
-            {domain !== 'Public' && (
+            {domain && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50/50 text-emerald-700 text-[11px] font-medium border border-emerald-100 hover:bg-emerald-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
                     <Globe className="w-3 h-3" />
                     <span>{domain}</span>
-                    <button onClick={(e) => { e.stopPropagation(); setDomain('Public'); setSubDomain('General'); }} className="text-emerald-400 hover:text-emerald-600 ml-0.5"><X className="w-3 h-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setDomain(null); setSubDomain(null); }} className="text-emerald-400 hover:text-emerald-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
 
-            {subDomain !== 'General' && (
+            {subDomain && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-purple-50/50 text-purple-700 text-[11px] font-medium border border-purple-100 hover:bg-purple-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
                     <ArrowUp className="w-3 h-3" />
                     <span>{subDomain}</span>
-                    <button onClick={(e) => { e.stopPropagation(); setSubDomain('General'); }} className="text-purple-400 hover:text-purple-600 ml-0.5"><X className="w-3 h-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setSubDomain(null); }} className="text-purple-400 hover:text-purple-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
 
-            {style !== 'Minimalist' && (
+            {style && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50/50 text-amber-700 text-[11px] font-medium border border-amber-100 hover:bg-amber-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
                     <Palette className="w-3 h-3" />
                     <span>{style}</span>
-                    <button onClick={(e) => { e.stopPropagation(); setStyle('Minimalist'); }} className="text-amber-400 hover:text-amber-600 ml-0.5"><X className="w-3 h-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setStyle(null); }} className="text-amber-400 hover:text-amber-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
 
-            {ratio !== '16:9' && (
+            {ratio && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-rose-50/50 text-rose-700 text-[11px] font-medium border border-rose-100 hover:bg-rose-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
                     <Monitor className="w-3 h-3" />
                     <span>{ratio}</span>
-                    <button onClick={(e) => { e.stopPropagation(); setRatio('16:9'); }} className="text-rose-400 hover:text-rose-600 ml-0.5"><X className="w-3 h-3" /></button>
+                    <button onClick={(e) => { e.stopPropagation(); setRatio(null); }} className="text-rose-400 hover:text-rose-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
         </>
@@ -273,8 +290,8 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                         <div className="grid gap-6">
                             <div className="space-y-3">
                                 <Label className="text-sm font-medium">메인 도메인 (Industry)</Label>
-                                <Select value={domain} onValueChange={(val) => { setDomain(val); setSubDomain(SUB_DOMAIN_OPTIONS[val]?.[0]?.value || 'General'); }}>
-                                    <SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger>
+                                <Select value={domain || ""} onValueChange={(val) => { setDomain(val); setSubDomain(SUB_DOMAIN_OPTIONS[val]?.[0]?.value || 'General'); }}>
+                                    <SelectTrigger className="h-10 w-full"><SelectValue placeholder="도메인 선택" /></SelectTrigger>
                                     <SelectContent className="z-[1100]">
                                         {DOMAIN_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                                     </SelectContent>
@@ -282,8 +299,8 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                             </div>
                             <div className="space-y-3">
                                 <Label className="text-sm font-medium">상세 분야 (Sector)</Label>
-                                <Select value={subDomain} onValueChange={setSubDomain}>
-                                    <SelectTrigger className="h-10 w-full"><SelectValue /></SelectTrigger>
+                                <Select value={subDomain || ""} onValueChange={setSubDomain}>
+                                    <SelectTrigger className="h-10 w-full"><SelectValue placeholder="상세 분야 선택" /></SelectTrigger>
                                     <SelectContent className="z-[1100]">
                                         {getSubDomains().map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
                                     </SelectContent>
@@ -414,12 +431,10 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
             <input type="file" ref={refInputRef} multiple className="hidden" accept="image/*" onChange={handleReferenceSelect} />
 
             {/* Reference Side Panel (Sheet-like) */}
-            {/* Overlay */}
             {showRefPanel && (
                 <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 transition-opacity" onClick={() => setShowRefPanel(false)} />
             )}
 
-            {/* Panel */}
             <div className={cn(
                 "fixed inset-y-0 right-0 z-50 w-full sm:max-w-md bg-background shadow-2xl transition-transform duration-300 ease-in-out border-l flex flex-col",
                 showRefPanel ? "translate-x-0" : "translate-x-full"
@@ -447,35 +462,55 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                         <p className="text-sm text-muted-foreground">클릭하여 여러 장의 이미지를 선택하세요</p>
                     </div>
 
-                    {/* Image Grid */}
-                    {referenceImages.length > 0 && (
-                        <div className="grid grid-cols-2 gap-4 animate-in fade-in zoom-in-95 duration-300">
-                            {referenceImages.map((file, idx) => (
-                                <div key={idx} className="relative group rounded-lg overflow-hidden border aspect-square shadow-sm">
-                                    <img src={URL.createObjectURL(file)} alt="" className="w-full h-full object-cover" />
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => removeReferenceImage(idx)}
-                                            className="h-8 w-8 p-0 rounded-full"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </Button>
-                                    </div>
+                    {/* Admin Curated Prompts Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <Sparkles className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Admin Prompts</span>
+                        </div>
+                        <div className="space-y-3">
+                            {(TEMPLATES.find(t => t.adminReferences)?.adminReferences?.prompts || [
+                                "Keep layouts high-impact and editorial.",
+                                "Prioritize legibility with chunky typography.",
+                                "Use vibrant gradients for a modern tech vibe."
+                            ]).map((p, i) => (
+                                <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-100 text-[11px] text-slate-600 leading-relaxed italic relative overflow-hidden group">
+                                    <div className="absolute left-0 top-0 w-1 h-full bg-primary/20 group-hover:bg-primary transition-all" />
+                                    "{p}"
                                 </div>
                             ))}
                         </div>
-                    )}
+                    </div>
+
+                    {/* Mood Board Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <ImageIcon className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">Mood Board</span>
+                        </div>
+                        <div className="grid grid-cols-1 gap-4">
+                            {(TEMPLATES.find(t => t.adminReferences)?.adminReferences?.images || [
+                                "/ref_minimalist_aesthetic.png",
+                                "/ref_vibrant_gradient.png",
+                                "/ref_dark_premium.png"
+                            ]).map((img, i) => (
+                                <div key={i} className="group relative aspect-[16/9] rounded-xl overflow-hidden border bg-slate-50 shadow-sm">
+                                    <img src={img} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Reference" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
                 </div>
 
-                <div className="p-4 border-t bg-muted/10">
-                    <Button className="w-full" onClick={() => setShowRefPanel(false)}>완료 ({referenceImages.length}장 선택됨)</Button>
+                <div className="p-6 border-t bg-muted/50">
+                    <Button className="w-full h-11 rounded-xl text-sm font-semibold" onClick={() => setShowRefPanel(false)}>
+                        반영하기
+                    </Button>
                 </div>
             </div>
 
-            {/* Hero Section: The "Magic" Input (Shadcn Style) */}
-            <section className="relative min-h-[60vh] flex flex-col items-center justify-center px-4">
+            {/* Hero Section */}
+            <section className="pt-32 pb-20 flex flex-col items-center justify-center px-4">
                 <div className="w-full max-w-2xl relative animate-in fade-in slide-in-from-bottom-8 duration-700">
 
                     {/* Header */}
@@ -509,7 +544,7 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                         />
 
                         {/* Combined Active Chips & File Preview Area */}
-                        {(attachedFile || logoFile || primaryColor !== '#3b82f6' || domain !== 'Public' || subDomain !== 'General' || style !== 'Minimalist' || ratio !== '16:9') && (
+                        {(attachedFile || logoFile || primaryColor !== '#3b82f6' || domain || subDomain || style || ratio) && (
                             <div className="px-4 pb-3 flex flex-wrap gap-2 animate-in slide-in-from-top-2 duration-200">
                                 {attachedFile && (
                                     <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted/80 rounded-md text-xs font-medium border">
@@ -542,10 +577,10 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                                 {/* 2. Option Button (Dialog Trigger) */}
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 text-xs font-medium", (logoFile || domain !== 'Public' || subDomain !== 'General' || primaryColor !== '#3b82f6' || style !== 'Minimalist' || ratio !== '16:9') && "border-primary text-primary bg-primary/5")}>
+                                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 text-xs font-medium", (logoFile || domain || subDomain || primaryColor !== '#3b82f6' || style || ratio) && "border-primary text-primary bg-primary/5")}>
                                             <Settings2 className="w-3.5 h-3.5" />
                                             <span>Option</span>
-                                            {(logoFile || domain !== 'Public' || subDomain !== 'General' || primaryColor !== '#3b82f6' || style !== 'Minimalist' || ratio !== '16:9') && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                            {(logoFile || domain || subDomain || primaryColor !== '#3b82f6' || style || ratio) && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[700px] h-[500px] p-0 flex flex-col gap-0 overflow-hidden">
@@ -609,7 +644,7 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                             <div className="ml-auto">
                                 <Button
                                     className="rounded-xl px-4 h-9 font-semibold text-xs shadow-md transition-all hover:scale-105 active:scale-95 bg-foreground text-background hover:bg-foreground/90"
-                                    onClick={() => prompt && onGenerateStart(prompt, parseInt(slideCount), attachedFile, { logo: logoFile, primaryColor, domain, subDomain, style }, referenceImages)}
+                                    onClick={() => prompt && onGenerateStart(prompt, parseInt(slideCount), attachedFile, { logo: logoFile, primaryColor, domain: domain || 'Public', subDomain: subDomain || 'General', style: style || 'Minimalist', ratio: ratio || '16:9' }, referenceImages)}
                                     disabled={!prompt}
                                 >
                                     <Sparkles className="w-3.5 h-3.5 mr-2 fill-current" />
@@ -621,23 +656,95 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                 </div>
             </section>
 
-            {/* Footer / Templates (Subtle) */}
-            <section className="px-8 pb-12 max-w-6xl mx-auto opacity-50 hover:opacity-100 transition-opacity duration-500">
-                <div className="text-center mb-6">
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Or start with a template</span>
+            {/* Template Gallery Section (Pinterest Inspired) */}
+            <section className="px-8 pb-24 max-w-7xl mx-auto space-y-10">
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div className="space-y-1">
+
+                        <h2 className="text-[20px] font-medium tracking-tight">Slide Template</h2>
+                    </div>
+
+                    {/* Filters & Search */}
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <div className="relative w-48 md:w-64">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                                placeholder="템플릿 검색..."
+                                className="pl-9 h-9 rounded-full bg-muted/50 border-none text-xs"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                        <div className="flex bg-muted/50 p-1 rounded-full border border-slate-100">
+                            {CATEGORIES.slice(0, 4).map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={cn(
+                                        "px-4 py-1.5 rounded-full text-[10px] font-bold transition-all",
+                                        selectedCategory === cat ? "bg-white shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"
+                                    )}
+                                >
+                                    {cat === 'All' ? '전체' : cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {TEMPLATES.slice(0, 5).map(t => (
-                        <div key={t.id} className="group cursor-pointer aspect-[16/9] rounded-lg overflow-hidden border bg-muted/30 relative" onClick={() => onSelectTemplate(t)}>
-                            {t.previewUrl ? (
-                                <img src={t.previewUrl} className="w-full h-full object-cover transition-transform group-hover:scale-105" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-[10px] text-muted-foreground">
-                                    {t.name}
+
+                {/* The Template Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                    {/* Special Action: Custom Import */}
+                    <div
+                        className="group flex flex-col gap-4 cursor-pointer"
+                        onClick={() => templateInputRef.current?.click()}
+                    >
+                        <div className="aspect-[16/9] rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center gap-3 transition-all group-hover:bg-slate-50 group-hover:border-primary/30 group-hover:scale-[1.02]">
+                            <div className="w-12 h-12 rounded-full bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover:text-primary transition-colors">
+                                <Plus className="w-6 h-6" />
+                            </div>
+                            <div className="text-center">
+                                <span className="text-[13px] font-bold text-slate-600 block">내 템플릿 추가</span>
+                                <span className="text-[10px] text-slate-400">PPTX 또는 JSON 가져오기</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {filteredTemplates.map(t => (
+                        <div
+                            key={t.id}
+                            className="group flex flex-col gap-4 cursor-pointer animate-in fade-in zoom-in-95 duration-500"
+                            onClick={() => onSelectTemplate(t)}
+                        >
+                            <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-slate-100 shadow-sm transition-all group-hover:shadow-2xl group-hover:shadow-primary/10 group-hover:-translate-y-2">
+                                {t.previewUrl ? (
+                                    <img src={t.previewUrl} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={t.name} />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-50 text-[10px] text-muted-foreground font-medium uppercase tracking-widest bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:16px_16px]">
+                                        {t.name}
+                                    </div>
+                                )}
+
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
+                                    <Button className="w-full rounded-full bg-primary hover:bg-primary/90 text-white font-bold text-xs gap-2">
+                                        템플릿 사용하기
+                                        <ChevronRight className="w-3.5 h-3.5" />
+                                    </Button>
                                 </div>
-                            )}
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <span className="text-white text-xs font-bold">Use Template</span>
+
+                                {t.category && (
+                                    <Badge className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-slate-900 border-none text-[9px] font-bold uppercase tracking-wider shadow-sm">
+                                        {t.category}
+                                    </Badge>
+                                )}
+                            </div>
+
+                            <div className="space-y-1.5 px-1">
+                                <h3 className="font-bold text-[14px] text-slate-900 leading-tight flex items-center justify-between">
+                                    {t.name}
+                                    {t.adminReferences && <Sparkles className="w-3 h-3 text-amber-400 fill-current" />}
+                                </h3>
+                                <p className="text-[11px] text-slate-500 line-clamp-1">{t.description}</p>
                             </div>
                         </div>
                     ))}

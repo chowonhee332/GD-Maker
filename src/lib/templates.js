@@ -16,11 +16,69 @@ export const TEMPLATES = [
         id: 'marketing-strategy-2025',
         name: '마케팅 전략 2025',
         description: 'Clean, corporate marketing roadmap.',
+        previewUrl: '/previews/kr_tech_dark.png',
         mainColor: '#0066ff',
         subColor: '#ffffff',
         designMood: 'Professional',
         category: 'Business',
-        layouts: { cover: 'split-white', body1: 'bullets', body2: 'data-grid' }
+        layouts: { cover: 'split-white', body1: 'bullets', body2: 'data-grid' },
+        adminReferences: {
+            prompts: [
+                "심플하면서도 힘 있는 볼드한 타이포그래피를 메인으로 사용하세요.",
+                "여백의 미를 살려 텍스트가 숨을 쉴 수 있는 공간을 충분히 확보하세요.",
+                "데이터 차트는 둥근 모서리와 부드러운 그라데이션을 적용하여 세련되게 표현하세요.",
+                "프로세스 다이어그램은 유기적으로 연결된 점과 선으로 현대적인 느낌을 줍니다."
+            ],
+            images: [
+                "/ref_minimalist_aesthetic.png",
+                "/ref_vibrant_gradient.png",
+                "/ref_dark_premium.png"
+            ]
+        }
+    },
+    {
+        id: 'digital-transformation',
+        name: 'Digital Transformation',
+        description: 'Dark mode enterprise strategy.',
+        previewUrl: '/previews/kr_minimal_white.png',
+        mainColor: '#020617',
+        subColor: '#334155',
+        designMood: 'Enterprise',
+        category: 'IT',
+        layouts: { cover: 'dark-hero', body1: 'step-flow', body2: 'comparison' }
+    },
+    {
+        id: 'healthcare-guide',
+        name: 'Healthcare Guide',
+        description: 'Clean medical and wellness layout.',
+        previewUrl: '/previews/kr_proposal_beige.png',
+        mainColor: '#ffffff',
+        subColor: '#0d9488',
+        designMood: 'Wellness',
+        category: 'Medical',
+        layouts: { cover: 'medical-illustration', body1: 'health-tips', body2: 'chart' }
+    },
+    {
+        id: 'smartflow-ai',
+        name: 'SmartFlow AI',
+        description: 'Futuristic robot and automation theme.',
+        previewUrl: '/previews/kr_portfolio_clean.png',
+        mainColor: '#1e40af',
+        subColor: '#dbeafe',
+        designMood: 'Cyber',
+        category: 'AI',
+        layouts: { cover: 'robot-hero', body1: 'automation-vibe', body2: 'flow-chart' }
+    },
+    {
+        id: 'tokyo-adventure',
+        name: 'Ultimate Tokyo Adventure',
+        description: 'Vibrant photography travel theme.',
+        previewUrl: '/previews/kr_portfolio_intro.png',
+        mainColor: '#9f1239',
+        subColor: '#fff1f2',
+        designMood: 'Vibrant',
+        category: 'Travel',
+        layouts: { cover: 'tokyo-night', body1: 'itinerary', body2: 'culture' }
     },
     {
         id: 'customer-relations',
@@ -53,26 +111,6 @@ export const TEMPLATES = [
         layouts: { cover: 'header-accent', body1: 'growth-chart', body2: 'map' }
     },
     {
-        id: 'digital-transformation',
-        name: 'Digital Transformation',
-        description: 'Dark mode enterprise strategy.',
-        mainColor: '#020617',
-        subColor: '#334155',
-        designMood: 'Enterprise',
-        category: 'IT',
-        layouts: { cover: 'dark-hero', body1: 'step-flow', body2: 'comparison' }
-    },
-    {
-        id: 'healthcare-guide',
-        name: 'Healthcare Guide',
-        description: 'Clean medical and wellness layout.',
-        mainColor: '#ffffff',
-        subColor: '#0d9488',
-        designMood: 'Wellness',
-        category: 'Medical',
-        layouts: { cover: 'medical-illustration', body1: 'health-tips', body2: 'chart' }
-    },
-    {
         id: 'digital-learning',
         name: 'Digital Learning',
         description: 'Green-accented educational tech theme.',
@@ -94,23 +132,13 @@ export const TEMPLATES = [
     },
     {
         id: 'excellence-solutions',
-        name: 'Excellence Solutions',
+        name: 'Business Excellence Solutions',
         description: 'Contrast heavy orange business style.',
         mainColor: '#ea580c',
         subColor: '#0f172a',
         designMood: 'Bold',
         category: 'Consulting',
         layouts: { cover: 'orange-split', body1: 'solution-grid', body2: 'result' }
-    },
-    {
-        id: 'smartflow-ai',
-        name: 'SmartFlow AI',
-        description: 'Futuristic robot and automation theme.',
-        mainColor: '#1e40af',
-        subColor: '#dbeafe',
-        designMood: 'Cyber',
-        category: 'AI',
-        layouts: { cover: 'robot-hero', body1: 'automation-vibe', body2: 'flow-chart' }
     },
     {
         id: 'business-strategy-pro',
@@ -163,18 +191,8 @@ export const TEMPLATES = [
         layouts: { cover: 'abstract-circle', body1: 'process-steps', body2: 'gallery' }
     },
     {
-        id: 'tokyo-adventure',
-        name: 'Ultimate Tokyo Adventure',
-        description: 'Vibrant photography travel theme.',
-        mainColor: '#9f1239',
-        subColor: '#fff1f2',
-        designMood: 'Vibrant',
-        category: 'Travel',
-        layouts: { cover: 'tokyo-night', body1: 'itinerary', body2: 'culture' }
-    },
-    {
         id: 'smart-home',
-        name: 'Smart Home Insights',
+        name: 'Smart Home Insights 2025',
         description: 'Yellow accent IoT analytics.',
         mainColor: '#18181b',
         subColor: '#facc15',
@@ -194,7 +212,7 @@ export const TEMPLATES = [
     },
     {
         id: 'storytelling-portfolio',
-        name: 'Storytelling Portfolio',
+        name: 'Visual Storytelling Portfolio',
         description: 'High impact typography for creatives.',
         mainColor: '#991b1b',
         subColor: '#fef2f2',

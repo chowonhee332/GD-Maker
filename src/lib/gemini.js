@@ -25,46 +25,64 @@ const fileToGenerativePart = async (file) => {
   });
 };
 
-export const generatePresentationContent = async (topic, config, visualAssets = []) => {
+export const generatePresentationContent = async (topic, config, visualAssets = [], curatedGuidance = "") => {
   if (!genAI) throw new Error("API Key not set");
 
   // Define the prompt for generation
   const promptText = `
-    You are a world-class presentation consultant and designer. Your task is to generate a highly professional, persuasive, and structured presentation outline for the topic: "${topic}".
+    You are a world-class presentation consultant and designer from a top-tier agency.
+    Topic: "${topic}"
     
-    Target Audience: ${config.audience}
-    Presentation Purpose: ${config.purpose}
-    Desired Tone: ${config.tone}
-    Industry/Domain: ${config.domain || 'General'}${config.subDomain && config.subDomain !== 'General' ? ` (Focus Sector: ${config.subDomain})` : ''}
-    Visual Identity: Focus on a design language that complements ${config.primaryColor ? `the primary color ${config.primaryColor}` : 'a professional color palette'}.
-    Visual Context: The user has provided reference images. Use these to infer the desired visual style, content depth, or even specific details if relevant.
+    [DESIGN GUIDELINES]:
+    ${curatedGuidance || "Modern, minimalist, and professional."}
 
-    Guidelines for Content:
-    - Cover: Create an evocative, high-impact title and a clear subtitle that establishes authority.
-    - Index: Provide 4-5 logical chapters that tell a coherent story.
-    - Divider: Create a strong transition message for the first major section.
-    - Body1 (Editorial): Use professional bullet points. Focus on "Why" and "How", not just "What".
-    - Body2 (Analysis): Provide a data-driven or visual summary that would fit a chart or matrix.
+    [CONTEXT]:
+    Audience: ${config.audience} | Purpose: ${config.purpose} | Tone: ${config.tone}
+    Industry: ${config.domain || 'General'} | Primary Color: ${config.primaryColor || '#3b82f6'}
 
-    Structural Requirements:
+    [DESIGN ANALYSIS STEP]:
+    1. Analyze the Context: Who is the audience? What is the goal? What emotional or professional response are we seeking?
+    2. Define a "Design Strategy": Based on this analysis, what visual language should we use? (e.g., "High-trust professional blue with structured layouts for investors" or "Energetic purple with fluid shapes for a creative workshop").
+
+    [VISUAL REQUIREMENTS]:
+    For EACH slide, provide specific design metadata:
+    1. 'icon': A Lucide React icon name (e.g., "TrendingUp", "Shield", "Zap").
+    2. 'layoutStyle': Specific layout type: "centered", "split", "grid", "hero-left", "hero-right", or "content-focused".
+    3. 'visualElement': A detailed description of the main visual (e.g., "A modern 3D chart showing 45% growth", "A high-quality image of a futuristic tech city").
+    4. 'theme': An object containing:
+       - 'bg': Background color (HEX, compatible with Primary Color).
+       - 'text': Contrast text color (HEX).
+       - 'accent': A secondary brand color (HEX).
+    5. 'accentShape': A style token for decorative elements: "diagonal", "bottom-bar", "floating-blobs", or "clean-border".
+    6. 'designRationale': A brief explanation of why this specific design (color/layout) was chosen for THIS slide based on the overall strategy.
+    7. 'chartData': IF the slide contains data analysis or trends, provide an array of objects: [{"name": "Category", "value": 100}]. Only include if relevant.
+
+    [CONTENT REQ]:
+    - LANGUAGE: **Strictly use Korean (한국어)** for all text fields (title, subtitle, content, designStrategy, designRationale, etc.).
+    - Professional language: Use polite and professional Korean (Business tone).
     - Provide EXACTLY ${config.pageCount || 5} slides.
-    - Language: Use the language of the provided topic (if Korean, use professional Korean).
-    - Format: Return a strict JSON object.
 
-    JSON Format Example:
+    JSON OBJECT ONLY (Ensure all values are in Korean):
     {
-      "title": "Main Project Title",
-      "subtitle": "Subtitle explaining the value prop",
+      "title": "메인 프로젝트 제목",
+      "subtitle": "부제목",
+      "designStrategy": "분석된 맥락에 따른 시각적 전략 요약 (한국어)",
       "slides": [
-        { "type": "cover", "title": "...", "content": "..." },
-        { "type": "index", "title": "...", "content": "..." },
-        { "type": "divider", "title": "...", "content": "..." },
-        { "type": "body1", "title": "...", "content": "..." },
-        { "type": "body2", "title": "...", "content": "..." }
+        { 
+          "type": "cover" | "index" | "divider" | "body1" | "body2", 
+          "title": "슬라이드 제목", 
+          "content": "슬라이드 내용", 
+          "icon": "...", 
+          "layoutStyle": "...",
+          "visualElement": "시각적 요소 설명",
+          "theme": { "bg": "...", "text": "...", "accent": "..." },
+          "accentShape": "...",
+          "designRationale": "디자인 의도 설명 (한국어)",
+          "chartData": [{"name": "항목1", "value": 10}, {"name": "항목2", "value": 20}] // 선택 사항 (차트 필요 시)
+        },
+        ...
       ]
     }
-    
-    CRITICAL: Return ONLY the JSON. No markdown, no explanations.
   `;
 
   // Prepare input parts (Prompt + Images)
@@ -124,7 +142,7 @@ const parseGeminiResponse = (text) => {
   return JSON.parse(cleanedText.trim());
 };
 
-export const generateCreonAsset = async (prompt, type) => {
+export const generateVisualAsset = async (prompt, type) => {
   if (!genAI) throw new Error("API Key not set");
 
   // TODO: Verify if the user's key allows image generation. 
@@ -202,11 +220,17 @@ export const refinePresentationContent = async (currentContent, message, visualA
     {
       "title": "Main Project Title",
       "subtitle": "Subtitle",
+      "designStrategy": "...",
       "slides": [
         { 
           "type": "cover", 
           "title": "...", 
           "content": "...", 
+          "icon": "...",
+          "layoutStyle": "...",
+          "theme": { "bg": "...", "text": "...", "accent": "..." },
+          "accentShape": "...",
+          "designRationale": "...",
           "backgroundImage": "url_from_assets_if_requested" 
         },
         ...

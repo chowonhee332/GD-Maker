@@ -41,11 +41,17 @@ import {
   ChevronLeft,
   RotateCw,
   Menu,
-  LayoutGrid
+  LayoutGrid,
+  Library,
+  Play
 } from 'lucide-react';
+
+import { usePresentationStore } from '@/lib/store';
 
 import Dashboard from "@/components/Dashboard";
 import ApiKeyDialog from "@/components/ApiKeyDialog";
+import VisualSidebar from "@/components/VisualSidebar";
+import SpectacleSlides from "@/components/SpectacleSlides";
 import { TEMPLATES } from '@/lib/templates';
 import { initGemini, generatePresentationContent, refinePresentationContent } from '@/lib/gemini';
 
@@ -73,40 +79,30 @@ const loadPptxGenJS = () => {
 const SLIDE_TYPES = ['cover', 'index', 'divider', 'body1', 'body2'];
 
 const App = () => {
-  // --- UI State ---
-  const [currentPreviewType, setCurrentPreviewType] = useState('cover');
+  const {
+    projectName, setProjectName,
+    generatedSlides, setGeneratedSlides,
+    designStrategy, setDesignStrategy,
+    apiKey, setApiKey,
+    currentView, setCurrentView,
+    theme, setTheme,
+    ratio, setRatio,
+    currentSlideType, setCurrentSlideType,
+    isGeneratingAI, setIsGeneratingAI,
+    historyItems, addHistoryItem
+  } = usePresentationStore();
+
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(false);
-  const [showCreonPanel, setShowCreonPanel] = useState(false);
+  const [showVisualPanel, setShowVisualPanel] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
-
-  // Actual Data History State
-  const [historyItems, setHistoryItems] = useState(() => {
-    const saved = localStorage.getItem('gd-maker-history');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem('gd-maker-history', JSON.stringify(historyItems));
-  }, [historyItems]);
-
-  const [apiKey, setApiKey] = useState('');
   const [isExporting, setIsExporting] = useState(false);
-  const [currentView, setCurrentView] = useState('dashboard'); // 'dashboard', 'builder'
-  const [theme, setTheme] = useState('light');
-  const [projectName, setProjectName] = useState("New Presentation");
-  const [ratio, setRatio] = useState('16:9');
-
-  // --- Builder Sidebars/Assets ---
-  const [canvasAssets, setCanvasAssets] = useState([]);
-
-  // --- Generation Logic ---
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [generatedSlides, setGeneratedSlides] = useState([]);
   const [isRefining, setIsRefining] = useState(false);
   const [editChatPrompt, setEditChatPrompt] = useState("");
   const [chatHistory, setChatHistory] = useState([
     { role: 'assistant', content: '안녕하세요! 발표 자료 생성을 도와드릴 Gemini 기반 에이전트입니다. 어떤 대화를 나눠볼까요?' }
   ]);
+  const [referenceImages, setReferenceImages] = useState([]);
+  const [canvasAssets, setCanvasAssets] = useState([]);
 
   // --- Refs ---
   const workspaceRef = useRef(null);
@@ -132,11 +128,11 @@ const App = () => {
       setTimeout(updateScale, 100);
       return () => window.removeEventListener('resize', updateScale);
     }
-  }, [currentView, showHistory, showCreonPanel]); // Also update scale when panels toggle
+  }, [currentView, showHistory, showVisualPanel]); // Also update scale when panels toggle
 
-  // Listen for messages from Creon Studio
+  // Listen for messages from Visual Studio
   useEffect(() => {
-    const handleCreonMessage = (event) => {
+    const handleVisualMessage = (event) => {
       try {
         const data = event.data;
         if (data && data.type === 'ASSET_SELECTED') {
@@ -154,18 +150,18 @@ const App = () => {
         }
       } catch (e) { }
     };
-    window.addEventListener('message', handleCreonMessage);
-    return () => window.removeEventListener('message', handleCreonMessage);
+    window.addEventListener('message', handleVisualMessage);
+    return () => window.removeEventListener('message', handleVisualMessage);
   }, []);
 
-  const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
+  const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
   const handleSelectTemplate = (template) => {
     setProjectName(template.name);
-    handleGenerateStart(template.name, 5, null, { domain: template.category, primaryColor: template.mainColor });
+    handleGenerateStart(template.name, 5, null, { domain: template.category, primaryColor: template.mainColor }, template.adminReferences?.images || [], template);
   };
 
-  const handleGenerateStart = async (promptText, targetPageCount, attachedFile = null, brandKit = null, referenceImages = []) => {
+  const handleGenerateStart = async (promptText, targetPageCount, attachedFile = null, brandKit = null, referenceImagesList = [], template = null) => {
     if (!apiKey) {
       setShowApiKeyDialog(true);
       toast.error("Please set your Gemini API Key first");
@@ -175,6 +171,7 @@ const App = () => {
     setProjectName(promptText || "New Presentation");
     setIsGeneratingAI(true);
     setCurrentView('builder');
+    setReferenceImages(referenceImagesList || []);
 
     try {
       toast.loading("AI가 프리미엄 슬라이드를 구성하고 있습니다...", { id: "generating" });
@@ -190,29 +187,52 @@ const App = () => {
         primaryColor: brandKit?.primaryColor
       };
 
-      const allVisualAssets = [...(referenceImages || [])];
+      const allVisualAssets = [...(referenceImagesList || [])].filter(img => typeof img !== 'string');
       if (attachedFile && attachedFile.type.startsWith('image/')) {
         allVisualAssets.push(attachedFile);
       }
 
-      const aiContent = await generatePresentationContent(promptText, generationConfig, allVisualAssets);
+      // Extract curated prompts from template or brandKit if available
+      const curatedGuidance = template?.adminReferences?.prompts?.join('\n') || "";
+
+      const aiContent = await generatePresentationContent(promptText, generationConfig, allVisualAssets, curatedGuidance);
 
       if (aiContent && aiContent.slides) {
         setGeneratedSlides(aiContent.slides);
         setProjectName(aiContent.title || promptText);
+        setDesignStrategy(aiContent.designStrategy || "");
 
         const newItem = {
           id: Date.now(),
           title: aiContent.title || promptText,
           date: new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' }),
           type: 'book',
-          slides: aiContent.slides
+          slides: aiContent.slides,
+          designStrategy: aiContent.designStrategy || ""
         };
-        setHistoryItems(prev => [newItem, ...prev]);
+        addHistoryItem(newItem);
         toast.success("슬라이드 초안이 완성되었습니다!", { id: "generating" });
       }
     } catch (e) {
-      toast.error("AI Generation failed: " + e.message, { id: "generating" });
+      toast.error("AI Generation failed. Using premium design placeholders.", { id: "generating" });
+
+      // Fallback stylized data for verification
+      const fallbackSlides = [
+        {
+          type: 'cover', title: promptText, content: 'AI-Enhanced Premium Presentation',
+          theme: { bg: '#0f172a', text: '#ffffff', accent: '#3b82f6' },
+          layoutStyle: 'centered', accentShape: 'floating-blobs',
+          designRationale: '청중의 신뢰를 얻기 위해 신뢰감 있는 딥블루 색상과 중앙 집중형 레이아웃을 사용했습니다.'
+        },
+        {
+          type: 'index', title: '컨텐츠 개요', content: '1. 시장 분석\n2. 전략 수립\n3. 기대 효과',
+          theme: { bg: '#ffffff', text: '#0f172a', accent: '#3b82f6' },
+          layoutStyle: 'split', accentShape: 'bottom-bar',
+          designRationale: '정보의 체계적인 전달을 위해 깔끔한 화이트 배경과 분할 레이아웃을 채택했습니다.'
+        }
+      ];
+      setGeneratedSlides(fallbackSlides);
+      setDesignStrategy("전문적인 제안서를 위한 신뢰 중심의 미니멀리즘 디자인 전략");
     } finally {
       setIsGeneratingAI(false);
     }
@@ -222,6 +242,7 @@ const App = () => {
     if (item.slides) {
       setGeneratedSlides(item.slides);
       setProjectName(item.title);
+      setDesignStrategy(item.designStrategy || "");
       setCurrentView('builder');
       setShowHistory(false);
       toast.info(`'${item.title}' 작업을 불러왔습니다.`);
@@ -252,29 +273,84 @@ const App = () => {
   };
 
   const downloadPptxPackage = async () => {
-    setIsExporting(true);
-    toast.loading("저장 중...", { id: 'export' });
+    toast.loading("파워포인트 파일을 생성 중입니다...", { id: 'export' });
     try {
       const PptxGen = await loadPptxGenJS();
       const pptx = new PptxGen();
-      pptx.layout = ratio === '16:9' ? 'LAYOUT_16x9' : 'LAYOUT_WIDE';
+      pptx.layout = (ratio || '16:9') === '16:9' ? 'LAYOUT_16x9' : 'LAYOUT_WIDE';
       pptx.title = projectName;
+
       generatedSlides.forEach(slideData => {
         const slide = pptx.addSlide();
-        slide.addText(slideData.title, { x: 1, y: 1, fontSize: 32, bold: true });
-        slide.addText(slideData.content, { x: 1, y: 2, fontSize: 18 });
+        const theme = slideData.theme || { bg: '#ffffff', text: '#000000', accent: '#3b82f6' };
+
+        // Set Slide Background
+        slide.background = { fill: theme.bg };
+
+        // Add Title
+        slide.addText(slideData.title, {
+          x: 0.5, y: 0.5, w: '90%',
+          fontSize: 32,
+          bold: true,
+          color: theme.text.replace('#', '')
+        });
+
+        // Add Content (or Chart)
+        if (slideData.chartData && slideData.chartData.length > 0) {
+          // Add Text Content first
+          slide.addText(slideData.content, {
+            x: 0.5, y: 1.5, w: '40%',
+            fontSize: 14,
+            color: theme.text.replace('#', '')
+          });
+
+          // Add Native Chart
+          const labels = slideData.chartData.map(d => d.name);
+          const values = slideData.chartData.map(d => d.value);
+
+          slide.addChart(pptx.ChartType.bar, [
+            {
+              name: 'Data',
+              labels: labels,
+              values: values
+            }
+          ], {
+            x: 5, y: 1.5, w: 5, h: 3,
+            showTitle: true,
+            title: slideData.title,
+            barDir: 'col',
+            chartColors: [theme.accent.replace('#', '')]
+          });
+        } else {
+          slide.addText(slideData.content, {
+            x: 0.5, y: 1.5, w: '90%',
+            fontSize: 18,
+            color: theme.text.replace('#', '')
+          });
+        }
+
+        // Add Design Rationale (Small at bottom)
+        if (slideData.designRationale) {
+          slide.addText(`AI 디자인 의도: ${slideData.designRationale}`, {
+            x: 0.5, y: 5.0, w: '90%',
+            fontSize: 9,
+            italic: true,
+            color: '888888'
+          });
+        }
       });
+
       await pptx.writeFile({ fileName: `${projectName}.pptx` });
       toast.success("PPTX 저장 완료!", { id: 'export' });
     } catch (e) {
-      toast.error("Export failed: " + e.message, { id: 'export' });
+      toast.error("내보내기 실패: " + e.message, { id: 'export' });
     } finally {
       setIsExporting(false);
     }
   };
 
   const handleSlideSelect = (type) => {
-    setCurrentPreviewType(type);
+    setCurrentSlideType(type);
     const element = slideRefs.current[type];
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
@@ -282,33 +358,178 @@ const App = () => {
   };
 
   const FocusedSlide = ({ type }) => {
+    const slideData = generatedSlides.find(s => s.type === type) || {};
     const isCover = type === 'cover';
-    const ratioClass = ratio === '16:9' ? 'aspect-[16/9] w-[800px]' : (ratio === '4:3' ? 'aspect-[4/3] w-[700px]' : 'aspect-square w-[600px]');
+    const isAnalysis = type === 'body2';
+    const effectiveRatio = ratio || '16:9';
+    const ratioClass = effectiveRatio === '16:9' ? 'aspect-[16/9] w-[800px]' : (effectiveRatio === '4:3' ? 'aspect-[4/3] w-[700px]' : 'aspect-square w-[600px]');
+
+    // AI Design Tokens
+    const theme = slideData.theme || { bg: '#ffffff', text: '#0f172a', accent: '#3b82f6' };
+    const layoutStyle = slideData.layoutStyle || (slideData.layout === 'split' ? 'split' : 'hero-left');
+    const accentShape = slideData.accentShape || 'clean-border';
+
+    const getLayoutClasses = () => {
+      switch (layoutStyle) {
+        case 'centered': return "items-center justify-center text-center";
+        case 'split': return "justify-start text-left";
+        case 'hero-right': return "items-end justify-center text-right";
+        case 'content-focused': return "justify-start pt-20";
+        default: return "justify-start";
+      }
+    };
 
     return (
       <div
         ref={el => slideRefs.current[type] = el}
-        className="relative shrink-0 snap-center"
+        className="relative shrink-0 snap-center p-4"
       >
-        <div className={cn(ratioClass, "bg-white shadow-xl rounded-sm overflow-hidden flex flex-col ring-1 ring-slate-200")}>
-          <div className="flex-1 relative overflow-hidden flex flex-col p-12">
-            <div className={cn("z-10", isCover ? "flex flex-col items-center justify-center h-full text-center" : "")}>
-              <h2 className={cn("font-bold tracking-tight text-slate-900", isCover ? "text-4xl mb-4" : "text-2xl mb-6")}>
-                {isCover ? projectName : (type === 'index' ? 'Index' : (type === 'divider' ? 'Section Divider' : 'Content Slide'))}
+        <div
+          className={cn(ratioClass, "shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-xl overflow-hidden flex ring-1 ring-slate-200/50 transition-all duration-700 group hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]")}
+          style={{
+            background: isCover
+              ? `linear-gradient(135deg, ${theme.bg} 0%, ${theme.accent}33 100%)`
+              : theme.bg,
+            color: theme.text
+          }}
+        >
+          {/* Subtle Grain/Noise Overlay for premium feel */}
+          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
+          {/* Accent Shapes with better effects */}
+          {accentShape === 'diagonal' && (
+            <div className="absolute top-0 right-0 w-2/3 h-full opacity-[0.07] bg-gradient-to-l from-current to-transparent -skew-x-12 translate-x-1/3 pointer-events-none transition-transform duration-1000 group-hover:translate-x-1/4" />
+          )}
+          {accentShape === 'bottom-bar' && (
+            <div className="absolute bottom-0 left-0 w-full h-12 opacity-[0.15] bg-current pointer-events-none" style={{ backgroundColor: theme.accent }} />
+          )}
+          {accentShape === 'floating-blobs' && (
+            <>
+              <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-[120px] opacity-[0.15] pointer-events-none animate-pulse" style={{ backgroundColor: theme.accent }} />
+              <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[100px] opacity-[0.1] pointer-events-none" style={{ backgroundColor: theme.accent }} />
+            </>
+          )}
+
+          <div className={cn("relative flex-1 flex flex-col p-16 overflow-hidden z-10", isAnalysis ? "w-2/3" : "w-full")}>
+
+            {/* Split Layout logic */}
+            {layoutStyle === 'split' && (
+              <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 bg-current border-l border-current/10" />
+            )}
+
+            <div className={cn("h-full flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150", getLayoutClasses())}>
+              <div className="flex items-center gap-4 mb-10">
+                <div
+                  className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:rotate-[360deg]"
+                  style={{ backgroundColor: theme.accent + '15', color: theme.accent, border: `1px solid ${theme.accent}33` }}
+                >
+                  <Sparkles className="w-6 h-6 animate-pulse" />
+                </div>
+                {!isCover && (
+                  <div className="flex flex-col">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">
+                      {type === 'index' ? '섹션 01' : type === 'divider' ? '전환 슬라이드' : '챕터 인사이트'}
+                    </h3>
+                    <div className="h-0.5 w-8 rounded-full" style={{ backgroundColor: theme.accent }} />
+                  </div>
+                )}
+              </div>
+
+              <h2 className={cn("font-black tracking-tighter leading-[1.05] mb-8 drop-shadow-sm", isCover ? "text-7xl max-w-4xl" : "text-5xl max-w-2xl")}>
+                {slideData.title || (isCover ? projectName : (type === 'index' ? 'Index' : (type === 'divider' ? 'Section Divider' : 'Content Slide')))}
               </h2>
-              <div className="text-slate-500 max-w-lg leading-relaxed">
-                {isCover ? "Premium presentation generated by AI Agent" : "AI가 생성한 전문적인 콘텐츠가 이곳에 표시됩니다."}
+
+              <div
+                className={cn(
+                  "leading-relaxed whitespace-pre-wrap font-medium opacity-70",
+                  isCover ? "text-2xl max-w-2xl" : "text-lg max-w-3xl",
+                  layoutStyle === 'hero-right' && "ml-auto"
+                )}
+              >
+                {slideData.content || (isCover ? "Premium presentation generated by AI Agent" : "AI가 생성한 전문적인 콘텐츠가 이곳에 표시됩니다.")}
+              </div>
+
+              {/* Enhanced Visual Element / Rationale Box with Glassmorphism */}
+              {(slideData.visualElement || slideData.designRationale) && (
+                <div
+                  className={cn(
+                    "mt-auto pt-8 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500",
+                    layoutStyle === 'hero-right' && "items-end"
+                  )}
+                >
+                  <div className={cn(
+                    "p-6 rounded-2xl border flex flex-col gap-3 max-w-2xl shadow-xl",
+                    theme.bg.toLowerCase().includes('ffffff') || theme.bg.toLowerCase().includes('fff') ? "glass" : "glass-dark"
+                  )}>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] shadow-sm flex items-center gap-2"
+                        style={{ backgroundColor: theme.accent, color: '#fff' }}
+                      >
+                        <Sparkles className="w-3 h-3" />
+                        AI 디자인 인사이트
+                      </div>
+                      {slideData.visualElement && (
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-current/5 border border-current/10">
+                          <ImageIcon className="w-3 h-3 opacity-40" />
+                          <p className="text-[10px] italic opacity-40 font-bold tracking-tight">"{slideData.visualElement}"</p>
+                        </div>
+                      )}
+                    </div>
+                    {slideData.designRationale && (
+                      <p className="text-[12px] font-semibold opacity-80 leading-relaxed italic">
+                        "{slideData.designRationale}"
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Analysis Sidebar (Keep existing logic but apply theme) */}
+          {isAnalysis && (
+            <div className="w-1/3 border-l border-current/10 flex flex-col items-center justify-center p-12 gap-10 z-10" style={{ backgroundColor: theme.bg + '50' }}>
+              <div className="w-full flex items-baseline justify-center gap-3 h-40">
+                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '40%', backgroundColor: theme.accent + '30' }} />
+                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '70%', backgroundColor: theme.accent + '50' }} />
+                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '90%', backgroundColor: theme.accent }} />
+                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '55%', backgroundColor: theme.accent + '40' }} />
+              </div>
+              <div className="w-full space-y-4">
+                <div className="h-2 w-full bg-current/10 rounded-full overflow-hidden">
+                  <div className="h-full w-3/4 animate-in slide-in-from-left duration-1000" style={{ backgroundColor: theme.accent }} />
+                </div>
+                <div className="flex justify-between text-[11px] font-black opacity-40 uppercase tracking-widest">
+                  <span>Data Depth</span>
+                  <span>High</span>
+                </div>
               </div>
             </div>
-            {canvasAssets.map(asset => (
-              <div key={asset.id} className="absolute pointer-events-none" style={{ left: asset.x, top: asset.y, transform: 'translate(-50%, -50%)' }}>
-                <img src={asset.url} alt="" className="w-16 h-16 object-contain" />
-              </div>
-            ))}
-          </div>
+          )}
+
+          {/* Simulated Image Overlays */}
+          {referenceImages.length > 0 && type === 'body1' && !isAnalysis && (
+            <div className="absolute bottom-16 right-16 w-56 h-36 rounded-xl border-4 border-white shadow-2xl overflow-hidden rotate-3 z-20 transition-transform hover:rotate-0 hover:scale-110 duration-500">
+              <img
+                src={typeof referenceImages[0] === 'string' ? referenceImages[0] : URL.createObjectURL(referenceImages[0])}
+                className="w-full h-full object-cover"
+                alt="Reference"
+              />
+            </div>
+          )}
+
+          {canvasAssets.map(asset => (
+            <div key={asset.id} className="absolute pointer-events-none z-30" style={{ left: asset.x, top: asset.y, transform: 'translate(-50%, -50%)' }}>
+              <img src={asset.url} alt="" className="w-20 h-20 object-contain drop-shadow-2xl" />
+            </div>
+          ))}
         </div>
       </div>
     );
+  };
+
+  const handleScroll = () => {
+    // Implement scroll handling if needed
   };
 
   return (
@@ -392,6 +613,18 @@ const App = () => {
           ratio={ratio}
           setRatio={setRatio}
         />
+      ) : currentView === 'presenter' ? (
+        <div className="flex-1 relative bg-black">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 right-4 z-[100] text-white/50 hover:text-white hover:bg-white/10"
+            onClick={() => setCurrentView('builder')}
+          >
+            <X className="w-6 h-6" />
+          </Button>
+          <SpectacleSlides slides={generatedSlides} ratio={ratio} />
+        </div>
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
           {/* 3. Header */}
@@ -417,14 +650,17 @@ const App = () => {
               <div className="flex items-center gap-3">
                 <span className="text-sm font-bold text-slate-900 tracking-tight">{projectName}</span>
                 <Separator orientation="vertical" className="h-3" />
-                <Badge variant="outline" className="text-[9px] uppercase font-bold tracking-widest px-2 py-0 border-slate-200 text-slate-400">{currentPreviewType}</Badge>
+                <Badge variant="outline" className="text-[9px] uppercase font-bold tracking-widest px-2 py-0 border-slate-200 text-slate-400">{currentSlideType}</Badge>
               </div>
             </div>
 
             <div className="flex items-center px-4 gap-3">
+              <Button variant="ghost" size="icon" className="h-9 w-9 text-slate-900" onClick={() => setCurrentView('presenter')}>
+                <Play className="w-5 h-5" />
+              </Button>
               <Button variant="outline" size="sm" className="h-8 rounded-full border-slate-200 text-xs font-bold" onClick={downloadPptxPackage} disabled={isExporting}>
                 {isExporting ? <Loader2 className="w-3 h-3 mr-2 animate-spin" /> : <Download className="w-3 h-3 mr-2" />}
-                Export
+                저장하기
               </Button>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full border border-slate-100 shadow-sm"><Share2 className="w-4 h-4 text-slate-900" /></Button>
             </div>
@@ -471,6 +707,25 @@ const App = () => {
 
             {/* 5. Main Canvas (Center) */}
             <main className="flex-1 flex flex-col bg-slate-50/50 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] relative overflow-hidden transition-all duration-300">
+
+              {/* Context Analysis Strategy Banner */}
+              {designStrategy && (
+                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[30] w-full max-w-2xl px-6">
+                  <div className="bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-sm rounded-2xl p-4 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                      <Target className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-0.5">AI 디자인 전략</h4>
+                      <p className="text-xs font-semibold text-slate-700 truncate">{designStrategy}</p>
+                    </div>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40 hover:opacity-100" onClick={() => setDesignStrategy("")}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
               <ScrollArea className="flex-1 h-full" ref={workspaceRef}>
                 <div className="flex items-center gap-12 p-20 min-w-max h-full snap-x snap-mandatory">
                   <div style={{ transform: `scale(${scale})`, transformOrigin: 'left center', display: 'flex', gap: '48px' }}>
@@ -487,12 +742,12 @@ const App = () => {
                 {SLIDE_TYPES.map(type => (
                   <Button
                     key={type}
-                    variant={currentPreviewType === type ? 'secondary' : 'ghost'}
+                    variant={currentSlideType === type ? 'secondary' : 'ghost'}
                     size="sm"
                     onClick={() => handleSlideSelect(type)}
                     className={cn(
                       "rounded-full px-5 text-[10px] font-bold capitalize transition-all",
-                      currentPreviewType === type ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:text-slate-900"
+                      currentSlideType === type ? "bg-slate-900 text-white shadow-lg shadow-slate-900/10" : "text-slate-500 hover:text-slate-900"
                     )}
                   >
                     {type === 'body1' ? '속지 1' : type === 'body2' ? '속지 2' : type === 'divider' ? '간지' : type === 'index' ? '목차' : '표지'}
@@ -501,15 +756,15 @@ const App = () => {
               </div>
             </main>
 
-            {/* 6. Push-style Creon Asset Panel (Part of Flex Flow) */}
+            {/* 6. Push-style Visual Asset Panel (Part of Flex Flow) */}
             <div
               className={cn(
                 "bg-background z-40 border-l border-border transition-all duration-300 overflow-hidden flex flex-col",
-                showCreonPanel ? "w-96" : "w-0"
+                showVisualPanel ? "w-96" : "w-0"
               )}
             >
               <div className="w-96 h-full relative">
-                <iframe src="/creon/index.html" className="w-full h-full border-none" title="Creon Assets" />
+                <iframe src="/creon/index.html" className="w-full h-full border-none" title="Visual Assets" />
               </div>
             </div>
 
@@ -518,11 +773,11 @@ const App = () => {
               <div
                 className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all hover:scale-105 overflow-hidden",
-                  showCreonPanel ? "bg-slate-900 shadow-lg shadow-slate-900/20" : "bg-slate-50"
+                  showVisualPanel ? "bg-slate-900 shadow-lg shadow-slate-900/20" : "bg-slate-50"
                 )}
-                onClick={() => setShowCreonPanel(!showCreonPanel)}
+                onClick={() => setShowVisualPanel(!showVisualPanel)}
               >
-                <img src="/creon/logo.png" alt="Creon" className={cn("w-5 h-5 object-contain", showCreonPanel && "brightness-0 invert")} />
+                <img src="/creon/logo.png" alt="Visual" className={cn("w-5 h-5 object-contain", showVisualPanel && "brightness-0 invert")} />
               </div>
               <Separator className="w-8" />
               <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl border border-dashed border-slate-200 text-slate-300 hover:text-primary hover:border-primary/30 transition-all">
@@ -535,7 +790,7 @@ const App = () => {
       )}
 
       {/* Modals & Dialogs */}
-      <ApiKeyDialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog} apiKey={apiKey} setApiKey={setApiKey} />
+      <ApiKeyDialog open={showApiKeyDialog} onOpenChange={setShowApiKeyDialog} />
       <Toaster />
     </div>
   );

@@ -4,10 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Key, Eye, EyeOff, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { usePresentationStore } from '@/lib/store';
 import { initGemini } from '@/lib/gemini';
 import { toast } from 'sonner';
 
-const ApiKeyDialog = ({ open, onOpenChange, apiKey, setApiKey }) => {
+const ApiKeyDialog = ({ open, onOpenChange }) => {
+    const { apiKey, setApiKey } = usePresentationStore();
     const [inputValue, setInputValue] = useState('');
     const [showKey, setShowKey] = useState(false);
     const [isValidating, setIsValidating] = useState(false);

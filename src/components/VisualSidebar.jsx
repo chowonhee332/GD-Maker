@@ -6,10 +6,10 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Sparkles, Image as ImageIcon, Box, Layers, Download, Loader2 } from 'lucide-react';
-import { generateCreonAsset } from '@/lib/gemini';
+import { generateVisualAsset } from '@/lib/gemini';
 import { toast } from "sonner";
 
-const CreonSidebar = ({ apiKey }) => {
+const VisualSidebar = ({ apiKey }) => {
     const [prompt, setPrompt] = useState('');
     const [isGenerating, setIsGenerating] = useState(false);
     const [generatedAssets, setGeneratedAssets] = useState([]); // Array of { type, url, prompt }
@@ -26,7 +26,7 @@ const CreonSidebar = ({ apiKey }) => {
 
         setIsGenerating(true);
         try {
-            const result = await generateCreonAsset(prompt, type);
+            const result = await generateVisualAsset(prompt, type);
             if (result.success) {
                 setGeneratedAssets(prev => [{ ...result, type, id: Date.now() }, ...prev]);
                 toast.success(`${type.toUpperCase()} Asset Generated!`);
@@ -43,7 +43,7 @@ const CreonSidebar = ({ apiKey }) => {
             <div className="p-4 border-b flex items-center justify-between">
                 <h2 className="font-semibold flex items-center gap-2">
                     <img src="/creon-logo.png" alt="" className="w-5 h-5 rounded-full bg-primary/10" onError={(e) => e.target.style.display = 'none'} />
-                    Creon Studio
+                    Visual Assets Studio
                 </h2>
                 {/* Optional: Add history button or settings here */}
             </div>
@@ -164,4 +164,4 @@ const CreonSidebar = ({ apiKey }) => {
     );
 };
 
-export default CreonSidebar;
+export default VisualSidebar;

@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
 @custom-variant dark (&:is(.dark *));
 
@@ -113,6 +114,18 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+.glass {
+  @apply bg-white/70 backdrop-blur-xl border border-white/20 shadow-xl;
+}
+
+.glass-dark {
+  @apply bg-slate-900/40 backdrop-blur-xl border border-white/10 shadow-2xl;
+}
+
+.slide-gradient-1 {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
 @layer utilities {
   .animate-loading-bar {
     animation: loading-bar 2s ease-in-out infinite;
@@ -157,5 +170,6 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Outfit', 'Inter', sans-serif;
   }
 }
