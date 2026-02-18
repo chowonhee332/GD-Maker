@@ -78,6 +78,29 @@ const loadPptxGenJS = () => {
 
 const SLIDE_TYPES = ['cover', 'index', 'divider', 'body1', 'body2'];
 
+const LoadingOverlay = () => (
+  <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center animate-in fade-in duration-300">
+    <div className="flex flex-col items-center gap-6 p-12 bg-card border rounded-3xl shadow-2xl max-w-md w-full text-center relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-tr from-primary/10 via-transparent to-primary/5 pointer-events-none" />
+      <div className="relative w-20 h-20 flex items-center justify-center">
+        <div className="absolute inset-0 border-4 border-primary/20 rounded-full" />
+        <div className="absolute inset-0 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+        <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+      </div>
+      <div className="space-y-2 relative z-10">
+        <h3 className="text-xl font-bold tracking-tight">AI가 슬라이드를 생성하고 있습니다</h3>
+        <p className="text-sm text-muted-foreground font-medium">
+          프리미엄 디자인을 적용하고 내용을 구성 중입니다.<br />
+          잠시만 기다려주세요...
+        </p>
+      </div>
+      <div className="w-full h-1.5 bg-secondary rounded-full overflow-hidden">
+        <div className="h-full bg-primary animate-progress origin-left" style={{ width: '100%', animation: 'progress 2s ease-in-out infinite' }} />
+      </div>
+    </div>
+  </div>
+);
+
 const App = () => {
   const {
     projectName, setProjectName,
@@ -103,6 +126,9 @@ const App = () => {
   ]);
   const [referenceImages, setReferenceImages] = useState([]);
   const [canvasAssets, setCanvasAssets] = useState([]);
+
+  // --- Contextual Editing State ---
+  const [attachedContext, setAttachedContext] = useState(null); // { type: 'slide' | 'asset', data: ... }
 
   // --- Refs ---
   const workspaceRef = useRef(null);
@@ -130,12 +156,13 @@ const App = () => {
     }
   }, [currentView, showHistory, showVisualPanel]); // Also update scale when panels toggle
 
-  // Listen for messages from Visual Studio
+  // Listen for messages from Visual Studio (Creon)
   useEffect(() => {
     const handleVisualMessage = (event) => {
       try {
         const data = event.data;
         if (data && data.type === 'ASSET_SELECTED') {
+          // Add to Canvas (Existing Logic)
           const newAsset = {
             id: Date.now(),
             type: data.assetType || 'image',
@@ -146,7 +173,14 @@ const App = () => {
             height: data.assetType === 'icon' ? 60 : 150
           };
           setCanvasAssets(prev => [...prev, newAsset]);
-          toast.success("슬라이드에 에셋이 추가되었습니다.");
+
+          // NEW: Auto-attach to Chat Context
+          setAttachedContext({
+            type: 'asset',
+            data: { url: data.assetUrl, type: data.assetType || 'image' },
+            preview: data.assetUrl
+          });
+          toast.success("에셋이 채팅에 첨부되었습니다.");
         }
       } catch (e) { }
     };
@@ -253,16 +287,30 @@ const App = () => {
     e.preventDefault();
     if (!editChatPrompt.trim() || isRefining) return;
 
-    const userMessage = editChatPrompt.trim();
-    setChatHistory(prev => [...prev, { role: 'user', content: userMessage }]);
+    let userMessage = editChatPrompt.trim();
+
+    // NEW: Inject Context into Message
+    if (attachedContext) {
+      if (attachedContext.type === 'slide') {
+        userMessage = `[TARGET_SLIDE: ${attachedContext.data.type}] ${userMessage}`;
+      } else if (attachedContext.type === 'asset') {
+        userMessage = `[USE_ASSET: ${attachedContext.data.url}] ${userMessage}`;
+      }
+    }
+
+    setChatHistory(prev => [...prev, { role: 'user', content: editChatPrompt.trim() }]); // Show original text to user
     setEditChatPrompt("");
+    setAttachedContext(null); // Clear context after send
     setIsRefining(true);
 
     try {
-      const updatedSlides = await refinePresentationContent(userMessage, generatedSlides);
-      if (updatedSlides) {
+      const response = await refinePresentationContent(userMessage, generatedSlides);
+      // Fix: extracted .slides from the response object
+      const updatedSlides = response.slides || response;
+
+      if (updatedSlides && Array.isArray(updatedSlides)) {
         setGeneratedSlides(updatedSlides);
-        setChatHistory(prev => [...prev, { role: 'assistant', content: '요청하신 변경 사항을 반영하여 슬라이드를 수정했습니다.' }]);
+        setChatHistory(prev => [...prev, { role: 'assistant', content: 'Changes applied successfully.' }]);
         toast.success("슬라이드가 업데이트되었습니다.");
       }
     } catch (e) {
@@ -355,29 +403,37 @@ const App = () => {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
     }
+    // NEW: Auto-attach Slide Context
+    setAttachedContext({
+      type: 'slide',
+      data: { type },
+      preview: type // Slide type serves as ID for preview component
+    });
   };
+
 
   const FocusedSlide = ({ type }) => {
     const slideData = generatedSlides.find(s => s.type === type) || {};
     const isCover = type === 'cover';
-    const isAnalysis = type === 'body2';
     const effectiveRatio = ratio || '16:9';
     const ratioClass = effectiveRatio === '16:9' ? 'aspect-[16/9] w-[800px]' : (effectiveRatio === '4:3' ? 'aspect-[4/3] w-[700px]' : 'aspect-square w-[600px]');
 
-    // AI Design Tokens
-    const theme = slideData.theme || { bg: '#ffffff', text: '#0f172a', accent: '#3b82f6' };
-    const layoutStyle = slideData.layoutStyle || (slideData.layout === 'split' ? 'split' : 'hero-left');
-    const accentShape = slideData.accentShape || 'clean-border';
+    // Responsive Typography Scale
+    const fontScale = effectiveRatio === '16:9' ? 1 : (effectiveRatio === '4:3' ? 0.9 : 0.85);
 
-    const getLayoutClasses = () => {
-      switch (layoutStyle) {
-        case 'centered': return "items-center justify-center text-center";
-        case 'split': return "justify-start text-left";
-        case 'hero-right': return "items-end justify-center text-right";
-        case 'content-focused': return "justify-start pt-20";
-        default: return "justify-start";
-      }
+    // Premium Design Tokens (Fallbacks to ensure no "ugly" defaults)
+    const theme = slideData.theme || {
+      bg: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      text: '#0f172a',
+      accent: '#3b82f6',
+      cardBg: 'rgba(255, 255, 255, 0.8)'
     };
+
+    // Standardize Layouts: Cover, Section, Content
+    const layoutStyle = slideData.layoutStyle || (isCover ? 'cover-premium' : 'content-card');
+
+    // Visual Fallback: Abstract Patterns if no image
+    const hasImage = referenceImages.length > 0 && type === 'body1';
 
     return (
       <div
@@ -385,149 +441,158 @@ const App = () => {
         className="relative shrink-0 snap-center p-4"
       >
         <div
-          className={cn(ratioClass, "shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-xl overflow-hidden flex ring-1 ring-slate-200/50 transition-all duration-700 group hover:shadow-[0_40px_80px_rgba(0,0,0,0.15)]")}
+          className={cn(ratioClass, "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden flex flex-col relative transition-all duration-700 group ring-1 ring-black/5")}
           style={{
-            background: isCover
-              ? `linear-gradient(135deg, ${theme.bg} 0%, ${theme.accent}33 100%)`
-              : theme.bg,
-            color: theme.text
+            background: theme.bg, // AI provided gradient or solid
+            color: theme.text,
+            fontFamily: '"Outfit", "Inter", sans-serif',
+            '--font-scale': fontScale
           }}
         >
-          {/* Subtle Grain/Noise Overlay for premium feel */}
-          <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/asfalt-dark.png')]" />
-          {/* Accent Shapes with better effects */}
-          {accentShape === 'diagonal' && (
-            <div className="absolute top-0 right-0 w-2/3 h-full opacity-[0.07] bg-gradient-to-l from-current to-transparent -skew-x-12 translate-x-1/3 pointer-events-none transition-transform duration-1000 group-hover:translate-x-1/4" />
-          )}
-          {accentShape === 'bottom-bar' && (
-            <div className="absolute bottom-0 left-0 w-full h-12 opacity-[0.15] bg-current pointer-events-none" style={{ backgroundColor: theme.accent }} />
-          )}
-          {accentShape === 'floating-blobs' && (
-            <>
-              <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-[120px] opacity-[0.15] pointer-events-none animate-pulse" style={{ backgroundColor: theme.accent }} />
-              <div className="absolute -bottom-32 -left-32 w-80 h-80 rounded-full blur-[100px] opacity-[0.1] pointer-events-none" style={{ backgroundColor: theme.accent }} />
-            </>
-          )}
+          {/* 1. Global Background Effects (Noise & Ambient) */}
+          <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cube-coat.png')] pointer-events-none" />
+          <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[120px] opacity-30 pointer-events-none animate-pulse" style={{ background: theme.accent }} />
+          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ background: theme.accent }} />
 
-          <div className={cn("relative flex-1 flex flex-col p-16 overflow-hidden z-10", isAnalysis ? "w-2/3" : "w-full")}>
+          {/* 2. Content Layer */}
+          <div className="relative z-10 w-full h-full flex flex-col p-12">
 
-            {/* Split Layout logic */}
-            {layoutStyle === 'split' && (
-              <div className="absolute top-0 right-0 w-1/3 h-full opacity-5 bg-current border-l border-current/10" />
+            {/* --- HEADER (Except Cover) --- */}
+            {!isCover && (
+              <div className="flex flex-col gap-4 mb-8">
+                <div className="flex items-center justify-between">
+                  <h2 className="font-bold tracking-tight leading-tight" style={{ color: theme.text, fontSize: 'calc(1.875rem * var(--font-scale))' }}>
+                    {slideData.title || (type === 'index' ? 'Index' : 'Key Content')}
+                  </h2>
+                  <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-current opacity-30">
+                    {projectName}
+                  </div>
+                </div>
+                {slideData.subtitle && (
+                  <p className="opacity-60 font-medium" style={{ fontSize: 'calc(1.125rem * var(--font-scale))' }}>{slideData.subtitle}</p>
+                )}
+                <div className="h-[2px] w-full rounded-full opacity-10 bg-current" />
+              </div>
             )}
 
-            <div className={cn("h-full flex flex-col animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150", getLayoutClasses())}>
-              <div className="flex items-center gap-4 mb-10">
-                <div
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center shadow-lg transition-all duration-500 group-hover:rotate-[360deg]"
-                  style={{ backgroundColor: theme.accent + '15', color: theme.accent, border: `1px solid ${theme.accent}33` }}
-                >
-                  <Sparkles className="w-6 h-6 animate-pulse" />
-                </div>
-                {!isCover && (
-                  <div className="flex flex-col">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] opacity-40 mb-1">
-                      {type === 'index' ? '섹션 01' : type === 'divider' ? '전환 슬라이드' : '챕터 인사이트'}
-                    </h3>
-                    <div className="h-0.5 w-8 rounded-full" style={{ backgroundColor: theme.accent }} />
+            {/* --- BODY CONTENT --- */}
+            <div className="flex-1 min-h-0 relative">
+
+              {/* Layout: Cover Premium */}
+              {isCover && (
+                <div className="h-full flex flex-col justify-center items-start gap-8 z-10 transition-all duration-700 hover:scale-[1.02]">
+                  <div className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-md border border-white/20 shadow-sm"
+                    style={{ background: theme.accent + '20', color: theme.accent }}>
+                    Premium Report
                   </div>
-                )}
-              </div>
-
-              <h2 className={cn("font-black tracking-tighter leading-[1.05] mb-8 drop-shadow-sm", isCover ? "text-7xl max-w-4xl" : "text-5xl max-w-2xl")}>
-                {slideData.title || (isCover ? projectName : (type === 'index' ? 'Index' : (type === 'divider' ? 'Section Divider' : 'Content Slide')))}
-              </h2>
-
-              <div
-                className={cn(
-                  "leading-relaxed whitespace-pre-wrap font-medium opacity-70",
-                  isCover ? "text-2xl max-w-2xl" : "text-lg max-w-3xl",
-                  layoutStyle === 'hero-right' && "ml-auto"
-                )}
-              >
-                {slideData.content || (isCover ? "Premium presentation generated by AI Agent" : "AI가 생성한 전문적인 콘텐츠가 이곳에 표시됩니다.")}
-              </div>
-
-              {/* Enhanced Visual Element / Rationale Box with Glassmorphism */}
-              {(slideData.visualElement || slideData.designRationale) && (
-                <div
-                  className={cn(
-                    "mt-auto pt-8 flex flex-col gap-4 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-500",
-                    layoutStyle === 'hero-right' && "items-end"
-                  )}
-                >
-                  <div className={cn(
-                    "p-6 rounded-2xl border flex flex-col gap-3 max-w-2xl shadow-xl",
-                    theme.bg.toLowerCase().includes('ffffff') || theme.bg.toLowerCase().includes('fff') ? "glass" : "glass-dark"
-                  )}>
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.15em] shadow-sm flex items-center gap-2"
-                        style={{ backgroundColor: theme.accent, color: '#fff' }}
-                      >
-                        <Sparkles className="w-3 h-3" />
-                        AI 디자인 인사이트
-                      </div>
-                      {slideData.visualElement && (
-                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-current/5 border border-current/10">
-                          <ImageIcon className="w-3 h-3 opacity-40" />
-                          <p className="text-[10px] italic opacity-40 font-bold tracking-tight">"{slideData.visualElement}"</p>
-                        </div>
-                      )}
-                    </div>
-                    {slideData.designRationale && (
-                      <p className="text-[12px] font-semibold opacity-80 leading-relaxed italic">
-                        "{slideData.designRationale}"
-                      </p>
-                    )}
+                  <h1 className="font-black tracking-tighter leading-[1.05] drop-shadow-sm max-w-4xl bg-clip-text text-transparent bg-gradient-to-r from-current to-current/70"
+                    style={{ backgroundImage: `linear-gradient(to right, ${theme.text}, ${theme.text}90)`, fontSize: 'calc(4.5rem * var(--font-scale))' }}>
+                    {slideData.title || projectName}
+                  </h1>
+                  <p className="font-medium opacity-70 max-w-2xl leading-relaxed" style={{ fontSize: 'calc(1.5rem * var(--font-scale))' }}>
+                    {slideData.subtitle || slideData.content || "Premium Presentation by AI Agent"}
+                  </p>
+                  <div className="mt-auto flex items-center gap-4 opacity-50 text-sm font-medium">
+                    <span>{new Date().toLocaleDateString()}</span>
+                    <span>•</span>
+                    <span>Prepared by AI</span>
                   </div>
                 </div>
               )}
+
+              {/* Layout: Content Card (Default Standard) */}
+              {!isCover && layoutStyle === 'content-card' && (
+                <div className="h-full grid grid-cols-12 gap-8">
+                  {/* Text Column */}
+                  <div className={cn("flex flex-col gap-6", hasImage ? "col-span-7" : "col-span-12")}>
+                    <div className="p-8 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm h-full overflow-y-auto"
+                      style={{ background: theme.cardBg || 'rgba(255,255,255,0.4)' }}>
+                      <div className="prose prose-lg max-w-none leading-relaxed opacity-90 whitespace-pre-wrap font-medium" style={{ fontSize: 'calc(1.125rem * var(--font-scale))' }}>
+                        {slideData.content || "Main content goes here."}
+                      </div>
+                    </div>
+                  </div>
+                  {/* Visual Column */}
+                  {hasImage && (
+                    <div className="col-span-5 h-full relative group">
+                      <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border-4 border-white transform rotate-2 transition-transform group-hover:rotate-0">
+                        <img
+                          src={typeof referenceImages[0] === 'string' ? referenceImages[0] : URL.createObjectURL(referenceImages[0])}
+                          className="w-full h-full object-cover"
+                          alt="visual"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Fallback pattern for split/other layouts mapping to standard */}
+              {!isCover && layoutStyle !== 'content-card' && layoutStyle !== 'section-glass' && (
+                <div className="h-full grid grid-cols-2 gap-12 items-center">
+                  <div className="p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/20 shadow-sm h-full">
+                    <div className="prose prose-xl max-w-none leading-relaxed opacity-90 whitespace-pre-wrap font-medium" style={{ fontSize: 'calc(1.25rem * var(--font-scale))' }}>
+                      {slideData.content || "Detail content goes here."}
+                    </div>
+                  </div>
+                  <div className="h-full rounded-2xl bg-current/5 border border-current/10 flex items-center justify-center p-12 overflow-hidden relative">
+                    {/* Abstract Graphic as Placeholder */}
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-current to-transparent" />
+                    <ImageIcon className="w-24 h-24 opacity-20 animate-pulse" />
+                  </div>
+                </div>
+              )}
+
+              {/* Layout: Section Glass */}
+              {!isCover && layoutStyle === 'section-glass' && (
+                <div className="h-full flex items-center justify-center">
+                  <div className="w-full max-w-3xl p-12 rounded-3xl backdrop-blur-xl border border-white/20 shadow-2xl text-center flex flex-col gap-6"
+                    style={{ background: theme.cardBg || 'rgba(255,255,255,0.1)' }}>
+                    <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-inner" style={{ background: theme.accent + '20' }}>
+                      <Sparkles className="w-8 h-8" style={{ color: theme.accent }} />
+                    </div>
+                    <h2 className="font-bold" style={{ fontSize: 'calc(2.25rem * var(--font-scale))' }}>{slideData.title}</h2>
+                    <div className="w-24 h-1 bg-current opacity-20 mx-auto rounded-full" />
+                    <p className="opacity-70 leading-relaxed" style={{ fontSize: 'calc(1.25rem * var(--font-scale))' }}>{slideData.content}</p>
+                  </div>
+                </div>
+              )}
+
             </div>
+
+            {/* --- FOOTER --- */}
+            {!isCover && (
+              <div className="mt-8 pt-4 border-t border-current/10 flex justify-between items-center opacity-40 text-[10px] font-medium tracking-wider uppercase">
+                <span>GD Maker AI</span>
+                <span>{projectName}</span>
+              </div>
+            )}
           </div>
 
-          {/* Analysis Sidebar (Keep existing logic but apply theme) */}
-          {isAnalysis && (
-            <div className="w-1/3 border-l border-current/10 flex flex-col items-center justify-center p-12 gap-10 z-10" style={{ backgroundColor: theme.bg + '50' }}>
-              <div className="w-full flex items-baseline justify-center gap-3 h-40">
-                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '40%', backgroundColor: theme.accent + '30' }} />
-                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '70%', backgroundColor: theme.accent + '50' }} />
-                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '90%', backgroundColor: theme.accent }} />
-                <div className="w-8 rounded-t-lg transition-all hover:scale-110" style={{ height: '55%', backgroundColor: theme.accent + '40' }} />
+          {/* Interactive Elements / AI Rationale Hint */}
+          {slideData.designRationale && (
+            <div className="absolute bottom-4 right-4 z-20 group/hint">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-help bg-white/10 backdrop-blur-md border border-white/20 shadow-sm hover:scale-110 transition-all">
+                <Info className="w-4 h-4 opacity-50" />
               </div>
-              <div className="w-full space-y-4">
-                <div className="h-2 w-full bg-current/10 rounded-full overflow-hidden">
-                  <div className="h-full w-3/4 animate-in slide-in-from-left duration-1000" style={{ backgroundColor: theme.accent }} />
-                </div>
-                <div className="flex justify-between text-[11px] font-black opacity-40 uppercase tracking-widest">
-                  <span>Data Depth</span>
-                  <span>High</span>
-                </div>
+              <div className="absolute bottom-full right-0 mb-2 w-64 p-4 rounded-xl bg-slate-900/90 text-white text-xs backdrop-blur-xl opacity-0 group-hover/hint:opacity-100 transition-opacity pointer-events-none translate-y-2 group-hover/hint:translate-y-0">
+                <p className="font-bold mb-1 text-emerald-400 flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI Insight</p>
+                {slideData.designRationale}
               </div>
             </div>
           )}
 
-          {/* Simulated Image Overlays */}
-          {referenceImages.length > 0 && type === 'body1' && !isAnalysis && (
-            <div className="absolute bottom-16 right-16 w-56 h-36 rounded-xl border-4 border-white shadow-2xl overflow-hidden rotate-3 z-20 transition-transform hover:rotate-0 hover:scale-110 duration-500">
-              <img
-                src={typeof referenceImages[0] === 'string' ? referenceImages[0] : URL.createObjectURL(referenceImages[0])}
-                className="w-full h-full object-cover"
-                alt="Reference"
-              />
-            </div>
-          )}
-
+          {/* Visual Elements positioned absolutely if needed */}
           {canvasAssets.map(asset => (
             <div key={asset.id} className="absolute pointer-events-none z-30" style={{ left: asset.x, top: asset.y, transform: 'translate(-50%, -50%)' }}>
               <img src={asset.url} alt="" className="w-20 h-20 object-contain drop-shadow-2xl" />
             </div>
           ))}
+
         </div>
       </div>
     );
   };
-
   const handleScroll = () => {
     // Implement scroll handling if needed
   };
@@ -690,15 +755,49 @@ const App = () => {
                 </div>
               </ScrollArea>
               <div className="p-4 border-t bg-slate-50/50">
+                {/* Context Attachment UI */}
+                {attachedContext && (
+                  <div className="mb-3 p-2 bg-white rounded-xl border border-blue-100 shadow-sm flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2">
+                    <div className="w-24 aspect-video bg-slate-100 rounded-md overflow-hidden relative border border-slate-200 shrink-0">
+                      {attachedContext.type === 'slide' ? (
+                        <div className="origin-top-left transform scale-[0.12] w-[800px] h-[450px]">
+                          <FocusedSlide type={attachedContext.data.type} />
+                        </div>
+                      ) : (
+                        <img src={attachedContext.preview} alt="" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-bold text-slate-800 truncate">
+                        {attachedContext.type === 'slide' ? `Current Slide: ${attachedContext.data.type}` : 'Asset Attached'}
+                      </p>
+                      <p className="text-[10px] text-slate-400 truncate">
+                        {attachedContext.type === 'slide' ? 'Enter instructions to modify this slide...' : 'Modifying slide with this asset...'}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6 text-slate-400 hover:text-red-500 rounded-full"
+                      onClick={() => setAttachedContext(null)}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+
                 <form onSubmit={handleEditChatSubmit} className="relative">
                   <Input
-                    placeholder="수정할 내용을 말씀해주세요..."
-                    className="pr-12 h-11 text-xs bg-white rounded-xl border-slate-200 focus-visible:ring-primary/20"
+                    placeholder={attachedContext ? "이 슬라이드를 어떻게 수정할까요?" : "수정할 내용을 말씀해주세요..."}
+                    className={cn(
+                      "pr-12 h-11 text-xs bg-white rounded-xl border-slate-200 focus-visible:ring-primary/20 transition-all",
+                      attachedContext && "border-blue-300 ring-4 ring-blue-50"
+                    )}
                     value={editChatPrompt}
                     onChange={(e) => setEditChatPrompt(e.target.value)}
                     disabled={isRefining}
                   />
-                  <Button type="submit" size="icon" className="absolute right-1.5 top-1.5 h-8 w-8 rounded-lg bg-slate-900 hover:bg-slate-800" disabled={!editChatPrompt.trim() || isRefining}>
+                  <Button type="submit" size="icon" className={cn("absolute right-1.5 top-1.5 h-8 w-8 rounded-lg transition-colors", attachedContext ? "bg-blue-600 hover:bg-blue-700" : "bg-slate-900 hover:bg-slate-800")} disabled={!editChatPrompt.trim() || isRefining}>
                     <Send className="w-4 h-4" />
                   </Button>
                 </form>
@@ -726,8 +825,12 @@ const App = () => {
                 </div>
               )}
 
+              {/* Loading Overlay (Full Screen) */}
+              {isGeneratingAI && <LoadingOverlay />}
+
               <ScrollArea className="flex-1 h-full" ref={workspaceRef}>
-                <div className="flex items-center gap-12 p-20 min-w-max h-full snap-x snap-mandatory">
+                {/* Hide Slides during generation to prevent flickering */}
+                <div className={cn("flex items-center gap-12 p-20 min-w-max h-full snap-x snap-mandatory transition-opacity duration-500", isGeneratingAI ? "opacity-0" : "opacity-100")}>
                   <div style={{ transform: `scale(${scale})`, transformOrigin: 'left center', display: 'flex', gap: '48px' }}>
                     {SLIDE_TYPES.map(type => (
                       <FocusedSlide key={type} type={type} />

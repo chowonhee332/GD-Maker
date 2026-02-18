@@ -30,39 +30,37 @@ export const generatePresentationContent = async (topic, config, visualAssets = 
 
   // Define the prompt for generation
   const promptText = `
-    You are a world-class presentation consultant and designer from a top-tier agency.
+    You are a world-class presentation designer known for "Premium Corporate Aesthetic".
     Topic: "${topic}"
     
-    [DESIGN GUIDELINES]:
-    ${curatedGuidance || "Modern, minimalist, and professional."}
+    [DESIGN PHILOSOPHY]:
+    - **Structure**: STRICTLY follow "Google Slides Standard" layouts (Title + Subtitle, Title + Body, Title + Two Columns). NO experimental layouts.
+    - **Aesthetic**: "Premium, Luxurious, Clean". Use gradients, glassmorphism, and bold typography.
+    - **Vibe**: Trustworthy, High-end, Professional.
 
     [CONTEXT]:
     Audience: ${config.audience} | Purpose: ${config.purpose} | Tone: ${config.tone}
     Industry: ${config.domain || 'General'} | Primary Color: ${config.primaryColor || '#3b82f6'}
 
-    [DESIGN ANALYSIS STEP]:
-    1. Analyze the Context: Who is the audience? What is the goal? What emotional or professional response are we seeking?
-    2. Define a "Design Strategy": Based on this analysis, what visual language should we use? (e.g., "High-trust professional blue with structured layouts for investors" or "Energetic purple with fluid shapes for a creative workshop").
-
     [VISUAL REQUIREMENTS]:
     For EACH slide, provide specific design metadata:
     1. 'icon': A Lucide React icon name (e.g., "TrendingUp", "Shield", "Zap").
-    2. 'layoutStyle': Specific layout type: "centered", "split", "grid", "hero-left", "hero-right", or "content-focused".
+    2. 'layoutStyle': STRICTLY one of: "cover-premium", "section-glass", "content-card", "content-split", "content-process".
     3. 'visualElement': A detailed description of the main visual (e.g., "A modern 3D chart showing 45% growth", "A high-quality image of a futuristic tech city").
     4. 'theme': An object containing:
-       - 'bg': Background color (HEX, compatible with Primary Color).
+       - 'bg': Background color (HEX). Use subtle gradients if possible (e.g. "linear-gradient(...)").
        - 'text': Contrast text color (HEX).
        - 'accent': A secondary brand color (HEX).
-    5. 'accentShape': A style token for decorative elements: "diagonal", "bottom-bar", "floating-blobs", or "clean-border".
+       - 'cardBg': A semi-transparent color for glassmorphism cards (e.g. "rgba(255, 255, 255, 0.1)").
+    5. 'accentShape': A style token: "glass-card", "gradient-blob", "mesh-gradient", or "clean-line".
     6. 'designRationale': A brief explanation of why this specific design (color/layout) was chosen for THIS slide based on the overall strategy.
-    7. 'chartData': IF the slide contains data analysis or trends, provide an array of objects: [{"name": "Category", "value": 100}]. Only include if relevant.
-
+    
     [CONTENT REQ]:
-    - LANGUAGE: **Strictly use Korean (한국어)** for all text fields (title, subtitle, content, designStrategy, designRationale, etc.).
-    - Professional language: Use polite and professional Korean (Business tone).
-    - Provide EXACTLY ${config.pageCount || 5} slides.
+    - LANGUAGE: **Strictly use ENGLISH** for all text fields, unless the user explicitly requested otherwise.
+    - **Cover Slide**: Must have a catchy Title and a solid Subtitle.
+    - **Content Slides**: Must have a valid 'content' field with 3-4 bullet points or a short paragraph. NEVER return empty content.
 
-    JSON OBJECT ONLY (Ensure all values are in Korean):
+    JSON OBJECT ONLY (Ensure all values are in English unless requested):
     {
       "title": "메인 프로젝트 제목",
       "subtitle": "부제목",
@@ -71,14 +69,15 @@ export const generatePresentationContent = async (topic, config, visualAssets = 
         { 
           "type": "cover" | "index" | "divider" | "body1" | "body2", 
           "title": "슬라이드 제목", 
-          "content": "슬라이드 내용", 
+          "subtitle": "슬라이드 부제목 (선택)",
+          "content": "본문 내용 (필수)", 
           "icon": "...", 
           "layoutStyle": "...",
           "visualElement": "시각적 요소 설명",
-          "theme": { "bg": "...", "text": "...", "accent": "..." },
+          "theme": { "bg": "...", "text": "...", "accent": "...", "cardBg": "..." },
           "accentShape": "...",
-          "designRationale": "디자인 의도 설명 (한국어)",
-          "chartData": [{"name": "항목1", "value": 10}, {"name": "항목2", "value": 20}] // 선택 사항 (차트 필요 시)
+          "designRationale": "디자인 의도 설명",
+          "chartData": [{"name": "항목1", "value": 10}, ...]
         },
         ...
       ]
@@ -89,44 +88,34 @@ export const generatePresentationContent = async (topic, config, visualAssets = 
   const imageParts = await Promise.all(visualAssets.map(fileToGenerativePart));
   const inputParts = [promptText, ...imageParts];
 
-  // Strategy: Gemini 3 Pro Preview (UI/UX Optimized) -> Gemini 3 Deep Think (Reasoning) -> Gemini 3 Flash Preview (Speed) -> Gemini 1.5 Pro
+  // Strategy: Gemini 3 Pro Preview (Primary) -> Gemini 2.5 Pro (Fallback) -> Gemini 2.0 Flash (Speed)
   try {
-    // 1. Try Gemini 3 Pro Preview (Target: Complex Reasoning, Coding, UI/UX)
+    // 1. Try Gemini 3 Pro Preview (Most Powerful)
     const model3Pro = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
     const result = await model3Pro.generateContent(inputParts);
     const response = await result.response;
-    return parseGeminiResponse(response.text());
+    return parseGeminiResponse(await response.text());
   } catch (error3Pro) {
-    console.warn("Gemini 3 Pro Preview failed, attempting fallback to Deep Think:", error3Pro.message);
+    console.warn("Gemini 3 Pro Preview failed, attempting fallback to 2.5 Pro:", error3Pro.message);
 
     try {
-      // 2. Try Gemini 3 Deep Think (Target: Deep Reasoning)
-      const model3Deep = genAI.getGenerativeModel({ model: "gemini-3-deep-think" });
-      const result = await model3Deep.generateContent(inputParts);
+      // 2. Fallback to Gemini 2.5 Pro (Stable High Quality)
+      const model25Pro = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
+      const result = await model25Pro.generateContent(inputParts);
       const response = await result.response;
-      return parseGeminiResponse(response.text());
-    } catch (error3Deep) {
-      console.warn("Gemini 3 Deep Think failed, attempting fallback to Flash Preview:", error3Deep.message);
+      return parseGeminiResponse(await response.text());
+    } catch (error25Pro) {
+      console.warn("Gemini 2.5 Pro failed, attempting fallback to 2.0 Flash:", error25Pro.message);
 
       try {
-        // 3. Try Gemini 3 Flash Preview (Target: Speed/Efficiency)
-        const model3Flash = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-        const result = await model3Flash.generateContent(inputParts);
+        // 3. Fallback to Gemini 2.0 Flash (Fast & Reliable)
+        const model2Flash = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const result = await model2Flash.generateContent(inputParts);
         const response = await result.response;
-        return parseGeminiResponse(response.text());
-      } catch (error3Flash) {
-        console.warn("Gemini 3 Flash Preview failed, attempting fallback to 1.5 Pro:", error3Flash.message);
-
-        try {
-          // 4. Fallback to Gemini 1.5 Pro (Stable)
-          const model15Pro = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-          const result = await model15Pro.generateContent(inputParts);
-          const response = await result.response;
-          return parseGeminiResponse(response.text());
-        } catch (flashError) {
-          console.error("All Gemini models failed:", flashError);
-          throw flashError;
-        }
+        return parseGeminiResponse(await response.text());
+      } catch (finalError) {
+        console.error("All Gemini models failed:", finalError);
+        throw finalError;
       }
     }
   }

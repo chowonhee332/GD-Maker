@@ -2567,5 +2567,65 @@
       // API Key 설정 예시 (콘솔에서 사용 가능)
       // localStorage.setItem('geminiApiKey', 'your-api-key-here');
     </script>
+    <script>
+      // Global Asset Selection Handler for Parent Window Integration
+      document.addEventListener('DOMContentLoaded', () => {
+        console.log("Creon Asset Listener Initialized");
+        
+        document.body.addEventListener('click', (e) => {
+          // 1. Identify if the click is on a valid asset
+          const target = e.target;
+          let assetUrl = null;
+          let assetType = 'image';
+          
+          // Case A: Icon Grid Item
+          const iconItem = target.closest('.icon-item');
+          if (iconItem) {
+            // Try to find the image or svg
+             const img = iconItem.querySelector('img');
+             if (img) assetUrl = img.src;
+             else if (iconItem.querySelector('svg')) {
+                // If it's an SVG, we might need to serialize it or get a data URL. 
+                // For now, let's assume we want the source if available, or just skip if complex.
+                // Simpler: Icons usually have a data-name or we can use the ID if available.
+             }
+             assetType = 'icon';
+          }
+
+          // Case B: Explore Feed Image/Video (Home)
+          if (!assetUrl && target.closest('#explore-feed')) {
+             if (target.tagName === 'IMG') assetUrl = target.src;
+             if (target.tagName === 'VIDEO') assetUrl = target.currentSrc || target.src;
+             assetType = target.tagName === 'VIDEO' ? 'video' : 'image';
+          }
+
+          // Case C: 2D/3D Result Images
+          if (!assetUrl) {
+            const resultImg = target.closest('.result-media-container img, #p2d-history-list img');
+            if (resultImg) {
+                assetUrl = resultImg.src;
+                assetType = 'image';
+            }
+          }
+
+          // 2. If valid asset found, Send Message to Parent
+          if (assetUrl) {
+            console.log("Asset Selected:", assetType, assetUrl);
+            
+            // Visual Feedback (Flash)
+            const el = target.closest('.icon-item') || target;
+            el.style.transition = "outline 0.1s";
+            el.style.outline = "4px solid #0070F3";
+            setTimeout(() => el.style.outline = "none", 300);
+
+            window.parent.postMessage({
+              type: 'ASSET_SELECTED',
+              assetType,
+              assetUrl
+            }, '*');
+          }
+        });
+      });
+    </script>
   </body>
 </html>
