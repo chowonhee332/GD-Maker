@@ -30,35 +30,38 @@ export const generatePresentationContent = async (topic, config, visualAssets = 
 
   // Define the prompt for generation
   const promptText = `
-    You are a world-class presentation designer known for "Premium Corporate Aesthetic".
+    You are a world-class presentation designer known for "Google Material Design 3 (Material You) Aesthetics".
     Topic: "${topic}"
     
     [DESIGN PHILOSOPHY]:
-    - **Structure**: STRICTLY follow "Google Slides Standard" layouts (Title + Subtitle, Title + Body, Title + Two Columns). NO experimental layouts.
-    - **Aesthetic**: "Premium, Luxurious, Clean". Use gradients, glassmorphism, and bold typography.
-    - **Vibe**: Trustworthy, High-end, Professional.
+    - **Structure**: STRICTLY follow clean, high-contrast, wide-margin presentation layouts.
+    - **Aesthetic**: "Material Design 3, Flat, Accessible, Friendly". 
+    - **Colors**: Use bright pastel backgrounds (e.g. #FEFBFA, #F3F4F9, #EADDFF) with high-contrast text. DO NOT use dark mode or gradients unless specifically requested.
+    - **Vibe**: Trustworthy, Modern, Google-like, Clean.
 
     [CONTEXT]:
     Audience: ${config.audience} | Purpose: ${config.purpose} | Tone: ${config.tone}
-    Industry: ${config.domain || 'General'} | Primary Color: ${config.primaryColor || '#3b82f6'}
+    Industry: ${config.domain || 'General'} | Primary Color: ${config.primaryColor || '#0B57D0'}
 
     [VISUAL REQUIREMENTS]:
     For EACH slide, provide specific design metadata:
     1. 'icon': A Lucide React icon name (e.g., "TrendingUp", "Shield", "Zap").
     2. 'layoutStyle': STRICTLY one of: "cover-premium", "section-glass", "content-card", "content-split", "content-process".
-    3. 'visualElement': A detailed description of the main visual (e.g., "A modern 3D chart showing 45% growth", "A high-quality image of a futuristic tech city").
+    3. 'visualElement': A detailed description of the main visual (e.g., "A clean geometric vector illustration of teamwork").
     4. 'theme': An object containing:
-       - 'bg': Background color (HEX). Use subtle gradients if possible (e.g. "linear-gradient(...)").
-       - 'text': Contrast text color (HEX).
-       - 'accent': A secondary brand color (HEX).
-       - 'cardBg': A semi-transparent color for glassmorphism cards (e.g. "rgba(255, 255, 255, 0.1)").
-    5. 'accentShape': A style token: "glass-card", "gradient-blob", "mesh-gradient", or "clean-line".
-    6. 'designRationale': A brief explanation of why this specific design (color/layout) was chosen for THIS slide based on the overall strategy.
+       - 'bg': Background color (HEX). MUST be a light Material 3 container color (e.g., #FEFBFA, #F3F4F9).
+       - 'text': Contrast text color (HEX). MUST be a dark on-surface color (e.g., #1C1B1F).
+       - 'accent': A primary accent color (HEX) from the Material 3 palette (e.g., #0B57D0, #6750A4).
+       - 'cardBg': A solid flat card color (HEX), usually #FFFFFF.
+    5. 'accentShape': A style token: "pill", "rounded-card", "flat-circle", or "clean-line".
+    6. 'designRationale': A brief explanation of why this specific Material 3 design (color/layout) was chosen for THIS slide.
     
     [CONTENT REQ]:
     - LANGUAGE: **Strictly use ENGLISH** for all text fields, unless the user explicitly requested otherwise.
     - **Cover Slide**: Must have a catchy Title and a solid Subtitle.
-    - **Content Slides**: Must have a valid 'content' field with 3-4 bullet points or a short paragraph. NEVER return empty content.
+    - **Index Slide (Table of Contents)**: The 'content' should be a numbered list of topics separated by newlines (e.g., "1. Introduction\n2. Market Analysis").
+    - **Divider Slide**: Used to separate major sections. Use a very short, impactful Title (1-2 words) and a brief Subtitle.
+    - **Content Slides (body1, body2)**: Must have a valid 'content' field with 3-4 bullet points or a short paragraph. NEVER return empty content. Validate if chartData is needed.
 
     JSON OBJECT ONLY (Ensure all values are in English unless requested):
     {

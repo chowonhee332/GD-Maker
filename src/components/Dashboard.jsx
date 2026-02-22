@@ -1,4 +1,5 @@
 import React, { useState, useRef, useMemo } from 'react';
+import PremiumSlideCanvas from './PremiumSlideCanvas';
 import {
     Plus,
     Sparkles,
@@ -48,7 +49,7 @@ import {
 import { toast } from "sonner";
 import { Badge } from "./ui/badge";
 
-const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio = '16:9', setRatio }) => {
+const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio = '16:9', setRatio, slides = null }) => {
     const isDark = theme === 'dark';
     const [prompt, setPrompt] = useState("");
     const [slideCount, setSlideCount] = useState("8");

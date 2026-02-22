@@ -51,7 +51,7 @@ import { usePresentationStore } from '@/lib/store';
 import Dashboard from "@/components/Dashboard";
 import ApiKeyDialog from "@/components/ApiKeyDialog";
 import VisualSidebar from "@/components/VisualSidebar";
-import SpectacleSlides from "@/components/SpectacleSlides";
+import PremiumSlideCanvas from "@/components/PremiumSlideCanvas";
 import { TEMPLATES } from '@/lib/templates';
 import { initGemini, generatePresentationContent, refinePresentationContent } from '@/lib/gemini';
 
@@ -145,8 +145,8 @@ const App = () => {
           const slideW = 800;
           const slideH = (slideW * 9) / 16;
           // Scale based on available space - reduce if panels are open
-          const scaleW = (clientWidth * 0.8) / slideW;
-          const scaleH = (clientHeight * 0.8) / slideH;
+          const scaleW = (clientWidth * 0.85) / slideW;
+          const scaleH = (clientHeight * 0.75) / slideH;
           setScale(Math.min(scaleW, scaleH, 1));
         }
       };
@@ -250,23 +250,58 @@ const App = () => {
     } catch (e) {
       toast.error("AI Generation failed. Using premium design placeholders.", { id: "generating" });
 
-      // Fallback stylized data for verification
+      // Material 3 Demo Fallback Data for Presentation
       const fallbackSlides = [
         {
-          type: 'cover', title: promptText, content: 'AI-Enhanced Premium Presentation',
-          theme: { bg: '#0f172a', text: '#ffffff', accent: '#3b82f6' },
-          layoutStyle: 'centered', accentShape: 'floating-blobs',
-          designRationale: '청중의 신뢰를 얻기 위해 신뢰감 있는 딥블루 색상과 중앙 집중형 레이아웃을 사용했습니다.'
+          type: 'cover',
+          title: 'Project Ignite: Q3 Strategy',
+          subtitle: 'Accelerating Growth with Material You',
+          content: 'A comprehensive overview of our product roadmap, design integration, and business milestones for the upcoming quarter.',
+          theme: { bg: '#EADDFF', text: '#21005D', accent: '#6750A4', cardBg: '#FFFFFF' },
+          layoutStyle: 'cover-premium',
+          icon: 'sparkles',
+          designRationale: 'Using Google Material 3 (M3) Primary Purple container with dark text for a friendly, modern, and accessible introduction.'
         },
         {
-          type: 'index', title: '컨텐츠 개요', content: '1. 시장 분석\n2. 전략 수립\n3. 기대 효과',
-          theme: { bg: '#ffffff', text: '#0f172a', accent: '#3b82f6' },
-          layoutStyle: 'split', accentShape: 'bottom-bar',
-          designRationale: '정보의 체계적인 전달을 위해 깔끔한 화이트 배경과 분할 레이아웃을 채택했습니다.'
+          type: 'index',
+          title: 'Agenda',
+          content: '1. Executive Summary\n2. User Experience Updates\n3. Core Technology Stack\n4. Strategic Roadmap\n5. Investment Opportunities',
+          theme: { bg: '#FEFBFA', text: '#1C1B1F', accent: '#0B57D0', cardBg: '#FFFFFF' },
+          designRationale: 'M3 Surface colors (Light/Neutral) combined with the primary Google Blue to maintain high contrast and clear information hierarchy.'
+        },
+        {
+          type: 'divider',
+          title: 'Part 1',
+          subtitle: 'User Experience & Research',
+          theme: { bg: '#FEFBFA', text: '#FFFFFF', accent: '#0B57D0', cardBg: '#FFFFFF' },
+          designRationale: 'Solid Blue (M3 Primary) background provides a strong visual break to refocus audience attention before diving into details.'
+        },
+        {
+          type: 'body1',
+          title: 'Growth Trajectory',
+          content: 'Our new design system has demonstrated a sustained engagement increase of 75% across all platforms. The resulting user satisfaction allows us to scale operations dramatically.',
+          theme: { bg: '#F3F4F9', text: '#1C1B1F', accent: '#0B57D0', cardBg: '#FFFFFF' },
+          layoutStyle: 'bento',
+          chartData: [
+            { name: "Engagement", value: "+75%" },
+            { name: "Task Success", value: "94%" },
+            { name: "Bounce Rate", value: "-22%" }
+          ],
+          designRationale: 'M3 elevated cards (Surface Container Lowest) on a slightly darker background (Surface Container Low) create a clean Bento Grid.'
+        },
+        {
+          type: 'body2',
+          title: 'Modern Architecture',
+          content: 'Integrating Material You dynamic colors reduces design debt by a factor of 10. Our new UI components perfectly adapt to user preferences and accessibility needs.',
+          theme: { bg: '#C2E7FF', text: '#001D35', accent: '#00639B', cardBg: '#FFFFFF' },
+          layoutStyle: 'showcase',
+          visualElement: 'A clean, abstract geometric composition representing interconnected components.',
+          backgroundImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+          designRationale: 'Split showcase layout combines high-fidelity imagery with M3 Secondary/Tertiary color palettes for a vibrant finish.'
         }
       ];
       setGeneratedSlides(fallbackSlides);
-      setDesignStrategy("전문적인 제안서를 위한 신뢰 중심의 미니멀리즘 디자인 전략");
+      setDesignStrategy("Clean, accessible, and vibrant Material Design 3 styling utilizing dynamic pastel backgrounds and pill-shaped elements.");
     } finally {
       setIsGeneratingAI(false);
     }
@@ -414,173 +449,16 @@ const App = () => {
 
   const FocusedSlide = ({ type }) => {
     const slideData = generatedSlides.find(s => s.type === type) || {};
-    const isCover = type === 'cover';
     const effectiveRatio = ratio || '16:9';
     const ratioClass = effectiveRatio === '16:9' ? 'aspect-[16/9] w-[800px]' : (effectiveRatio === '4:3' ? 'aspect-[4/3] w-[700px]' : 'aspect-square w-[600px]');
-
-    // Responsive Typography Scale
-    const fontScale = effectiveRatio === '16:9' ? 1 : (effectiveRatio === '4:3' ? 0.9 : 0.85);
-
-    // Premium Design Tokens (Fallbacks to ensure no "ugly" defaults)
-    const theme = slideData.theme || {
-      bg: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-      text: '#0f172a',
-      accent: '#3b82f6',
-      cardBg: 'rgba(255, 255, 255, 0.8)'
-    };
-
-    // Standardize Layouts: Cover, Section, Content
-    const layoutStyle = slideData.layoutStyle || (isCover ? 'cover-premium' : 'content-card');
-
-    // Visual Fallback: Abstract Patterns if no image
-    const hasImage = referenceImages.length > 0 && type === 'body1';
 
     return (
       <div
         ref={el => slideRefs.current[type] = el}
-        className="relative shrink-0 snap-center p-4"
+        className={cn("relative shrink-0 snap-center p-4 group", ratioClass)}
       >
-        <div
-          className={cn(ratioClass, "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden flex flex-col relative transition-all duration-700 group ring-1 ring-black/5")}
-          style={{
-            background: theme.bg, // AI provided gradient or solid
-            color: theme.text,
-            fontFamily: '"Outfit", "Inter", sans-serif',
-            '--font-scale': fontScale
-          }}
-        >
-          {/* 1. Global Background Effects (Noise & Ambient) */}
-          <div className="absolute inset-0 opacity-[0.04] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cube-coat.png')] pointer-events-none" />
-          <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[120px] opacity-30 pointer-events-none animate-pulse" style={{ background: theme.accent }} />
-          <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ background: theme.accent }} />
-
-          {/* 2. Content Layer */}
-          <div className="relative z-10 w-full h-full flex flex-col p-12">
-
-            {/* --- HEADER (Except Cover) --- */}
-            {!isCover && (
-              <div className="flex flex-col gap-4 mb-8">
-                <div className="flex items-center justify-between">
-                  <h2 className="font-bold tracking-tight leading-tight" style={{ color: theme.text, fontSize: 'calc(1.875rem * var(--font-scale))' }}>
-                    {slideData.title || (type === 'index' ? 'Index' : 'Key Content')}
-                  </h2>
-                  <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-current opacity-30">
-                    {projectName}
-                  </div>
-                </div>
-                {slideData.subtitle && (
-                  <p className="opacity-60 font-medium" style={{ fontSize: 'calc(1.125rem * var(--font-scale))' }}>{slideData.subtitle}</p>
-                )}
-                <div className="h-[2px] w-full rounded-full opacity-10 bg-current" />
-              </div>
-            )}
-
-            {/* --- BODY CONTENT --- */}
-            <div className="flex-1 min-h-0 relative">
-
-              {/* Layout: Cover Premium */}
-              {isCover && (
-                <div className="h-full flex flex-col justify-center items-start gap-8 z-10 transition-all duration-700 hover:scale-[1.02]">
-                  <div className="px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.2em] backdrop-blur-md border border-white/20 shadow-sm"
-                    style={{ background: theme.accent + '20', color: theme.accent }}>
-                    Premium Report
-                  </div>
-                  <h1 className="font-black tracking-tighter leading-[1.05] drop-shadow-sm max-w-4xl bg-clip-text text-transparent bg-gradient-to-r from-current to-current/70"
-                    style={{ backgroundImage: `linear-gradient(to right, ${theme.text}, ${theme.text}90)`, fontSize: 'calc(4.5rem * var(--font-scale))' }}>
-                    {slideData.title || projectName}
-                  </h1>
-                  <p className="font-medium opacity-70 max-w-2xl leading-relaxed" style={{ fontSize: 'calc(1.5rem * var(--font-scale))' }}>
-                    {slideData.subtitle || slideData.content || "Premium Presentation by AI Agent"}
-                  </p>
-                  <div className="mt-auto flex items-center gap-4 opacity-50 text-sm font-medium">
-                    <span>{new Date().toLocaleDateString()}</span>
-                    <span>•</span>
-                    <span>Prepared by AI</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Layout: Content Card (Default Standard) */}
-              {!isCover && layoutStyle === 'content-card' && (
-                <div className="h-full grid grid-cols-12 gap-8">
-                  {/* Text Column */}
-                  <div className={cn("flex flex-col gap-6", hasImage ? "col-span-7" : "col-span-12")}>
-                    <div className="p-8 rounded-2xl border border-white/20 shadow-sm backdrop-blur-sm h-full overflow-y-auto"
-                      style={{ background: theme.cardBg || 'rgba(255,255,255,0.4)' }}>
-                      <div className="prose prose-lg max-w-none leading-relaxed opacity-90 whitespace-pre-wrap font-medium" style={{ fontSize: 'calc(1.125rem * var(--font-scale))' }}>
-                        {slideData.content || "Main content goes here."}
-                      </div>
-                    </div>
-                  </div>
-                  {/* Visual Column */}
-                  {hasImage && (
-                    <div className="col-span-5 h-full relative group">
-                      <div className="absolute inset-0 rounded-2xl overflow-hidden shadow-lg border-4 border-white transform rotate-2 transition-transform group-hover:rotate-0">
-                        <img
-                          src={typeof referenceImages[0] === 'string' ? referenceImages[0] : URL.createObjectURL(referenceImages[0])}
-                          className="w-full h-full object-cover"
-                          alt="visual"
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Fallback pattern for split/other layouts mapping to standard */}
-              {!isCover && layoutStyle !== 'content-card' && layoutStyle !== 'section-glass' && (
-                <div className="h-full grid grid-cols-2 gap-12 items-center">
-                  <div className="p-8 rounded-2xl bg-white/50 backdrop-blur-sm border border-white/20 shadow-sm h-full">
-                    <div className="prose prose-xl max-w-none leading-relaxed opacity-90 whitespace-pre-wrap font-medium" style={{ fontSize: 'calc(1.25rem * var(--font-scale))' }}>
-                      {slideData.content || "Detail content goes here."}
-                    </div>
-                  </div>
-                  <div className="h-full rounded-2xl bg-current/5 border border-current/10 flex items-center justify-center p-12 overflow-hidden relative">
-                    {/* Abstract Graphic as Placeholder */}
-                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-current to-transparent" />
-                    <ImageIcon className="w-24 h-24 opacity-20 animate-pulse" />
-                  </div>
-                </div>
-              )}
-
-              {/* Layout: Section Glass */}
-              {!isCover && layoutStyle === 'section-glass' && (
-                <div className="h-full flex items-center justify-center">
-                  <div className="w-full max-w-3xl p-12 rounded-3xl backdrop-blur-xl border border-white/20 shadow-2xl text-center flex flex-col gap-6"
-                    style={{ background: theme.cardBg || 'rgba(255,255,255,0.1)' }}>
-                    <div className="mx-auto w-16 h-16 rounded-2xl flex items-center justify-center mb-4 shadow-inner" style={{ background: theme.accent + '20' }}>
-                      <Sparkles className="w-8 h-8" style={{ color: theme.accent }} />
-                    </div>
-                    <h2 className="font-bold" style={{ fontSize: 'calc(2.25rem * var(--font-scale))' }}>{slideData.title}</h2>
-                    <div className="w-24 h-1 bg-current opacity-20 mx-auto rounded-full" />
-                    <p className="opacity-70 leading-relaxed" style={{ fontSize: 'calc(1.25rem * var(--font-scale))' }}>{slideData.content}</p>
-                  </div>
-                </div>
-              )}
-
-            </div>
-
-            {/* --- FOOTER --- */}
-            {!isCover && (
-              <div className="mt-8 pt-4 border-t border-current/10 flex justify-between items-center opacity-40 text-[10px] font-medium tracking-wider uppercase">
-                <span>GD Maker AI</span>
-                <span>{projectName}</span>
-              </div>
-            )}
-          </div>
-
-          {/* Interactive Elements / AI Rationale Hint */}
-          {slideData.designRationale && (
-            <div className="absolute bottom-4 right-4 z-20 group/hint">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center cursor-help bg-white/10 backdrop-blur-md border border-white/20 shadow-sm hover:scale-110 transition-all">
-                <Info className="w-4 h-4 opacity-50" />
-              </div>
-              <div className="absolute bottom-full right-0 mb-2 w-64 p-4 rounded-xl bg-slate-900/90 text-white text-xs backdrop-blur-xl opacity-0 group-hover/hint:opacity-100 transition-opacity pointer-events-none translate-y-2 group-hover/hint:translate-y-0">
-                <p className="font-bold mb-1 text-emerald-400 flex items-center gap-1"><Sparkles className="w-3 h-3" /> AI Insight</p>
-                {slideData.designRationale}
-              </div>
-            </div>
-          )}
+        <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/5 relative transition-all duration-700 hover:ring-primary/30">
+          <PremiumSlideCanvas slides={[slideData]} ratio={effectiveRatio} previewMode={true} />
 
           {/* Visual Elements positioned absolutely if needed */}
           {canvasAssets.map(asset => (
@@ -588,7 +466,6 @@ const App = () => {
               <img src={asset.url} alt="" className="w-20 h-20 object-contain drop-shadow-2xl" />
             </div>
           ))}
-
         </div>
       </div>
     );
@@ -688,7 +565,7 @@ const App = () => {
           >
             <X className="w-6 h-6" />
           </Button>
-          <SpectacleSlides slides={generatedSlides} ratio={ratio} />
+          <PremiumSlideCanvas slides={generatedSlides} ratio={ratio} />
         </div>
       ) : (
         <div className="flex-1 flex flex-col overflow-hidden">
@@ -807,23 +684,7 @@ const App = () => {
             {/* 5. Main Canvas (Center) */}
             <main className="flex-1 flex flex-col bg-slate-50/50 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] relative overflow-hidden transition-all duration-300">
 
-              {/* Context Analysis Strategy Banner */}
-              {designStrategy && (
-                <div className="absolute top-6 left-1/2 -translate-x-1/2 z-[30] w-full max-w-2xl px-6">
-                  <div className="bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-sm rounded-2xl p-4 flex items-center gap-4 animate-in fade-in slide-in-from-top-4 duration-700">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                      <Target className="w-5 h-5 text-primary" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="text-[10px] font-black uppercase tracking-widest text-primary mb-0.5">AI 디자인 전략</h4>
-                      <p className="text-xs font-semibold text-slate-700 truncate">{designStrategy}</p>
-                    </div>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 opacity-40 hover:opacity-100" onClick={() => setDesignStrategy("")}>
-                      <X className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              )}
+              {/* Removed Context Analysis Strategy Banner as per user request */}
 
               {/* Loading Overlay (Full Screen) */}
               {isGeneratingAI && <LoadingOverlay />}
