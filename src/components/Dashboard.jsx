@@ -17,7 +17,8 @@ import {
     X,
     Search,
     ChevronRight,
-    LayoutGrid
+    LayoutGrid,
+    FileText
 } from 'lucide-react';
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -55,13 +56,31 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
     const [slideCount, setSlideCount] = useState("8");
     const [attachedFile, setAttachedFile] = useState(null);
     const [logoFile, setLogoFile] = useState(null);
+    const [clientLogoFile, setClientLogoFile] = useState(null);
+    const [characterFile, setCharacterFile] = useState(null);
     const [primaryColor, setPrimaryColor] = useState("#3b82f6");
     const [domain, setDomain] = useState(null);
     const [subDomain, setSubDomain] = useState(null);
+    const [requestType, setRequestType] = useState(null);
     const [style, setStyle] = useState(null);
+    const [slidePrompts, setSlidePrompts] = useState({
+        cover: "Premium technology showcase theme. Deep charcoal background (#1E1E1E) with Kakao Yellow (#FEE500) accents. High-impact editorial layout with bold, heavy sans-serif typography. Include a futuristic 3D abstract graphic representing AI and connectivity.",
+        index: "Minimalist agenda layout. Use oversized heavy-weight numbers for each section. High contrast with yellow bullet points. Clean white space balancing the dark theme.",
+        divider: "Section transition slide. Bold uppercase typography. Use a deep gradient background with a glassmorphism card effect in the center to highlight the title.",
+        body1: "Data-driven layout. Focus on key metrics and performance. High-contrast bar charts using Kakao Yellow and White on dark background. Clearly labeled metrics with bold typography.",
+        body2: "Strategic infrastructure visualization. Left side contains bulleted lists with geometric icons. Clean, professional layout for global expansion or technical schematics."
+    });
+    const [attachedPdf, setAttachedPdf] = useState(null);
+    const [slideImages, setSlideImages] = useState({
+        cover: "/templates/cover.png",
+        index: "/templates/index.png",
+        divider: "/templates/divider.png",
+        body1: "/templates/body1.png",
+        body2: "/templates/body2.png"
+    });
     const [activeCategory, setActiveCategory] = useState("basic");
     const [showRefPanel, setShowRefPanel] = useState(false);
-    const [referenceImages, setReferenceImages] = useState([]);
+
 
     // Template filtering
     const [searchQuery, setSearchQuery] = useState("");
@@ -70,6 +89,8 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
     const fileInputRef = useRef(null);
     const templateInputRef = useRef(null);
     const logoInputRef = useRef(null);
+    const clientLogoInputRef = useRef(null);
+    const charInputRef = useRef(null);
     const refInputRef = useRef(null);
 
     const CATEGORIES = ["All", ...new Set(TEMPLATES.filter(t => t.category).map(t => t.category))];
@@ -98,6 +119,12 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
         { value: 'Telco', label: '통신/미디어 (Telco)' },
         { value: 'Construction', label: '건설/엔지니어링 (Construction)' },
         { value: 'Healthcare', label: '의료/바이오 (Healthcare)' },
+    ];
+
+    const REQUEST_TYPE_OPTIONS = [
+        { value: '제안/제언', label: '제안/제언 (Proposal)' },
+        { value: '발표본', label: '발표본 (Presentation)' },
+        { value: '요약서', label: '요약서 (Summary)' }
     ];
 
     const SUB_DOMAIN_OPTIONS = {
@@ -164,14 +191,22 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
         { id: 'layout', label: '규격', icon: Monitor },
     ];
 
-    const handleFileSelect = (e) => {
+    const handleFileSelect = (e, slideId = null) => {
         const file = e.target.files?.[0];
         if (file) {
             if (file.type.startsWith('image/')) {
-                setAttachedFile(file);
-                toast.success(`이미지가 첨부되었습니다: ${file.name}`);
+                if (slideId) {
+                    setSlideImages(prev => ({ ...prev, [slideId]: file }));
+                    toast.success(`${slideId} 장표 이미지가 첨부되었습니다.`);
+                } else {
+                    setAttachedFile(file);
+                    toast.success(`이미지가 첨부되었습니다: ${file.name}`);
+                }
+            } else if (file.type === 'application/pdf') {
+                setAttachedPdf(file);
+                toast.success(`PDF가 첨부되었습니다: ${file.name}`);
             } else {
-                toast.error("이미지 파일만 첨부할 수 있습니다.");
+                toast.error("이미지 또는 PDF 파일만 첨부할 수 있습니다.");
             }
         }
         e.target.value = '';
@@ -182,9 +217,35 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
         if (file) {
             if (file.type.startsWith('image/')) {
                 setLogoFile(file);
-                toast.success(`로고가 등록되었습니다: ${file.name}`);
+                toast.success(`제안사 로고가 등록되었습니다: ${file.name}`);
             } else {
                 toast.error("이미지 파일만 로고로 사용할 수 있습니다.");
+            }
+        }
+        e.target.value = '';
+    };
+
+    const handleClientLogoSelect = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.type.startsWith('image/')) {
+                setClientLogoFile(file);
+                toast.success(`고객사 로고가 등록되었습니다: ${file.name}`);
+            } else {
+                toast.error("이미지 파일만 로고로 사용할 수 있습니다.");
+            }
+        }
+        e.target.value = '';
+    };
+
+    const handleCharSelect = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            if (file.type.startsWith('image/')) {
+                setCharacterFile(file);
+                toast.success(`캐릭터가 등록되었습니다: ${file.name}`);
+            } else {
+                toast.error("이미지 파일만 캐릭터로 사용할 수 있습니다.");
             }
         }
         e.target.value = '';
@@ -217,8 +278,20 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
         setAttachedFile(null);
     };
 
+    const removeAttachedPdf = () => {
+        setAttachedPdf(null);
+    };
+
     const removeLogoFile = () => {
         setLogoFile(null);
+    };
+
+    const removeClientLogoFile = () => {
+        setClientLogoFile(null);
+    };
+
+    const removeCharFile = () => {
+        setCharacterFile(null);
     };
 
     const getSubDomains = () => {
@@ -232,8 +305,28 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                     <div className="relative w-3.5 h-3.5 flex items-center justify-center overflow-hidden rounded-full border border-blue-200 bg-white">
                         <img src={URL.createObjectURL(logoFile)} className="w-full h-full object-cover" />
                     </div>
-                    <span>Logo</span>
+                    <span>제안사</span>
                     <button onClick={(e) => { e.stopPropagation(); removeLogoFile(); }} className="text-blue-400 hover:text-blue-600 ml-0.5"><X className="w-3 h-3" /></button>
+                </div>
+            )}
+
+            {clientLogoFile && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50/50 text-slate-700 text-[11px] font-medium border border-slate-100 hover:bg-slate-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
+                    <div className="relative w-3.5 h-3.5 flex items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white">
+                        <img src={URL.createObjectURL(clientLogoFile)} className="w-full h-full object-cover" />
+                    </div>
+                    <span>고객사</span>
+                    <button onClick={(e) => { e.stopPropagation(); removeClientLogoFile(); }} className="text-slate-400 hover:text-slate-600 ml-0.5"><X className="w-3 h-3" /></button>
+                </div>
+            )}
+
+            {characterFile && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-pink-50/50 text-pink-700 text-[11px] font-medium border border-pink-100 hover:bg-pink-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
+                    <div className="relative w-3.5 h-3.5 flex items-center justify-center overflow-hidden rounded-full border border-pink-200 bg-white">
+                        <img src={URL.createObjectURL(characterFile)} className="w-full h-full object-cover" />
+                    </div>
+                    <span>Char</span>
+                    <button onClick={(e) => { e.stopPropagation(); removeCharFile(); }} className="text-pink-400 hover:text-pink-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
 
@@ -261,11 +354,27 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                 </div>
             )}
 
+            {requestType && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-orange-50/50 text-orange-700 text-[11px] font-medium border border-orange-100 hover:bg-orange-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
+                    <FileText className="w-3 h-3" />
+                    <span>{requestType}</span>
+                    <button onClick={(e) => { e.stopPropagation(); setRequestType(null); }} className="text-orange-400 hover:text-orange-600 ml-0.5"><X className="w-3 h-3" /></button>
+                </div>
+            )}
+
             {style && (
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-50/50 text-amber-700 text-[11px] font-medium border border-amber-100 hover:bg-amber-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
                     <Palette className="w-3 h-3" />
                     <span>{style}</span>
                     <button onClick={(e) => { e.stopPropagation(); setStyle(null); }} className="text-amber-400 hover:text-amber-600 ml-0.5"><X className="w-3 h-3" /></button>
+                </div>
+            )}
+
+            {Object.values(slidePrompts).some(p => p.length > 0) && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50/50 text-blue-700 text-[11px] font-medium border border-blue-100 hover:bg-blue-50 transition-colors cursor-default animate-in fade-in zoom-in-95 duration-300">
+                    <Sparkles className="w-3 h-3" />
+                    <span>맞춤 프롬프트 설정됨</span>
+                    <button onClick={(e) => { e.stopPropagation(); setSlidePrompts({ cover: "", index: "", divider: "", body1: "", body2: "" }); }} className="text-blue-400 hover:text-blue-600 ml-0.5"><X className="w-3 h-3" /></button>
                 </div>
             )}
 
@@ -289,6 +398,15 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                             <p className="text-sm text-muted-foreground">제안서를 제출할 산업군과 세부 분야를 선택하세요.</p>
                         </div>
                         <div className="grid gap-6">
+                            <div className="space-y-3">
+                                <Label className="text-sm font-medium">요청 타입 (문서 성격)</Label>
+                                <Select value={requestType || ""} onValueChange={setRequestType}>
+                                    <SelectTrigger className="h-10 w-full"><SelectValue placeholder="문서 성격 선택" /></SelectTrigger>
+                                    <SelectContent className="z-[1100]">
+                                        {REQUEST_TYPE_OPTIONS.map(opt => <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                             <div className="space-y-3">
                                 <Label className="text-sm font-medium">메인 도메인 (Industry)</Label>
                                 <Select value={domain || ""} onValueChange={(val) => { setDomain(val); setSubDomain(SUB_DOMAIN_OPTIONS[val]?.[0]?.value || 'General'); }}>
@@ -318,30 +436,86 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                             <p className="text-sm text-muted-foreground">로고와 메인 컬러를 설정하여 통일감을 줍니다.</p>
                         </div>
                         <div className="grid gap-6">
-                            <div className="space-y-3">
-                                <Label className="text-sm font-medium">로고 이미지</Label>
-                                <div
-                                    className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-32 bg-muted/10"
-                                    onClick={() => logoInputRef.current?.click()}
-                                >
-                                    {logoFile ? (
-                                        <div className="relative group w-full h-full flex items-center justify-center">
-                                            <img src={URL.createObjectURL(logoFile)} alt="Logo" className="max-h-full max-w-full object-contain" />
-                                            <button
-                                                onClick={(e) => { e.stopPropagation(); removeLogoFile(); }}
-                                                className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                                            <div className="p-2 bg-background rounded-full shadow-sm">
-                                                <Upload className="w-5 h-5" />
+                            <div className="grid grid-cols-3 gap-4">
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-medium">제안사</Label>
+                                    <div
+                                        className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-32 bg-muted/10"
+                                        onClick={() => logoInputRef.current?.click()}
+                                    >
+                                        {logoFile ? (
+                                            <div className="relative group w-full h-full flex items-center justify-center">
+                                                <img src={URL.createObjectURL(logoFile)} alt="Logo" className="max-h-full max-w-full object-contain" />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); removeLogoFile(); }}
+                                                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
                                             </div>
-                                            <span className="text-xs font-medium">로고 업로드</span>
-                                        </div>
-                                    )}
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground text-center">
+                                                <div className="p-2 bg-background rounded-full shadow-sm">
+                                                    <Upload className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[9px] font-bold">제안사 로고</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-medium">고객사</Label>
+                                    <div
+                                        className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-32 bg-muted/10"
+                                        onClick={() => clientLogoInputRef.current?.click()}
+                                    >
+                                        {clientLogoFile ? (
+                                            <div className="relative group w-full h-full flex items-center justify-center">
+                                                <img src={URL.createObjectURL(clientLogoFile)} alt="Client Logo" className="max-h-full max-w-full object-contain" />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); removeClientLogoFile(); }}
+                                                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground text-center">
+                                                <div className="p-2 bg-background rounded-full shadow-sm">
+                                                    <Upload className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[9px] font-bold">고객사 로고</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <Label className="text-sm font-medium">캐릭터</Label>
+                                    <div
+                                        className="border-2 border-dashed rounded-xl p-4 flex flex-col items-center justify-center cursor-pointer hover:bg-muted/50 transition-colors h-32 bg-muted/10"
+                                        onClick={() => charInputRef.current?.click()}
+                                    >
+                                        {characterFile ? (
+                                            <div className="relative group w-full h-full flex items-center justify-center">
+                                                <img src={URL.createObjectURL(characterFile)} alt="Char" className="max-h-full max-w-full object-contain" />
+                                                <button
+                                                    onClick={(e) => { e.stopPropagation(); removeCharFile(); }}
+                                                    className="absolute -top-2 -right-2 bg-destructive text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                                                >
+                                                    <X className="w-3.5 h-3.5" />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col items-center gap-2 text-muted-foreground text-center">
+                                                <div className="p-2 bg-background rounded-full shadow-sm">
+                                                    <Upload className="w-4 h-4" />
+                                                </div>
+                                                <span className="text-[9px] font-bold">캐릭터 업로드</span>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
 
@@ -426,9 +600,27 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
     return (
         <div className="flex-1 overflow-y-auto scrollbar-hide bg-background text-foreground transition-colors duration-500">
             {/* Hidden Inputs */}
-            <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} />
+            <input type="file" ref={fileInputRef} className="hidden" accept="image/*,application/pdf" onChange={(e) => handleFileSelect(e)} />
+            {[
+                { id: 'cover', label: '표지 (Cover)' },
+                { id: 'index', label: '목차 (Index)' },
+                { id: 'divider', label: '간지 (Divider)' },
+                { id: 'body1', label: '속지 1 (Body 1)' },
+                { id: 'body2', label: '속지 2 (Body 2)' }
+            ].map(slide => (
+                <input
+                    key={`input-${slide.id}`}
+                    id={`file-input-${slide.id}`}
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    onChange={(e) => handleFileSelect(e, slide.id)}
+                />
+            ))}
             <input type="file" ref={templateInputRef} className="hidden" accept=".json,.pptx" onChange={handleTemplateImport} />
             <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={handleLogoSelect} />
+            <input type="file" ref={clientLogoInputRef} className="hidden" accept="image/*" onChange={handleClientLogoSelect} />
+            <input type="file" ref={charInputRef} className="hidden" accept="image/*" onChange={handleCharSelect} />
             <input type="file" ref={refInputRef} multiple className="hidden" accept="image/*" onChange={handleReferenceSelect} />
 
             {/* Reference Side Panel (Sheet-like) */}
@@ -451,17 +643,112 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                    {/* Upload Area */}
-                    <div
-                        className="border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors bg-muted/10 group"
-                        onClick={() => refInputRef.current?.click()}
-                    >
-                        <div className="p-3 bg-background rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
-                            <ImagePlus className="w-6 h-6 text-primary" />
+                    {/* PDF Upload Area */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <FileImage className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">PDF 참고 자료</span>
                         </div>
-                        <h3 className="font-semibold mb-1">참고 이미지 업로드</h3>
-                        <p className="text-sm text-muted-foreground">클릭하여 여러 장의 이미지를 선택하세요</p>
+                        <div
+                            className={cn(
+                                "border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-muted/50 transition-colors bg-muted/10 group relative",
+                                attachedPdf && "border-red-200 bg-red-50/30"
+                            )}
+                            onClick={() => fileInputRef.current?.click()}
+                        >
+                            {attachedPdf ? (
+                                <>
+                                    <div className="p-3 bg-red-100 rounded-full mb-2">
+                                        <FileImage className="w-6 h-6 text-red-600" />
+                                    </div>
+                                    <h3 className="font-semibold text-sm mb-1">{attachedPdf.name}</h3>
+                                    <p className="text-[11px] text-muted-foreground">PDF가 분석 데이터로 사용됩니다.</p>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); removeAttachedPdf(); }}
+                                        className="absolute top-2 right-2 p-1.5 rounded-full bg-white shadow-sm border text-muted-foreground hover:text-destructive transition-colors"
+                                    >
+                                        <X className="w-3.5 h-3.5" />
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="p-3 bg-background rounded-full shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                                        <Upload className="w-6 h-6 text-primary" />
+                                    </div>
+                                    <h3 className="font-semibold mb-1">PDF 파일 업로드</h3>
+                                    <p className="text-sm text-muted-foreground">내용 분석을 위해 PDF를 첨부하세요</p>
+                                </>
+                            )}
+                        </div>
                     </div>
+
+                    {/* Slide-Specific Prompts Section */}
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2 text-slate-400">
+                            <Monitor className="w-3 h-3" />
+                            <span className="text-[10px] font-bold uppercase tracking-widest">각 슬라이드별 프롬프트</span>
+                        </div>
+                        <div className="space-y-4">
+                            {[
+                                { id: 'cover', label: '표지 (Cover)' },
+                                { id: 'index', label: '목차 (Index)' },
+                                { id: 'divider', label: '간지 (Divider)' },
+                                { id: 'body1', label: '속지 1 (Body 1)' },
+                                { id: 'body2', label: '속지 2 (Body 2)' }
+                            ].map((slide) => (
+                                <div key={slide.id} className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <Label className="text-[11px] font-bold text-slate-600">{slide.label}</Label>
+                                        <div className="flex items-center gap-2">
+                                            {slideImages[slide.id] && (
+                                                <Badge variant="secondary" className="h-5 px-1.5 gap-1 bg-primary/5 text-primary border-primary/20">
+                                                    <ImageIcon className="w-2.5 h-2.5" />
+                                                    <span className="text-[9px]">Image Set</span>
+                                                    <X
+                                                        className="w-2.5 h-2.5 cursor-pointer hover:text-destructive"
+                                                        onClick={() => setSlideImages(prev => ({ ...prev, [slide.id]: null }))}
+                                                    />
+                                                </Badge>
+                                            )}
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="h-6 px-2 text-[9px] gap-1"
+                                                onClick={() => document.getElementById(`file-input-${slide.id}`)?.click()}
+                                            >
+                                                <Upload className="w-2.5 h-2.5" />
+                                                이미지 추가
+                                            </Button>
+                                        </div>
+                                    </div>
+
+                                    {slideImages[slide.id] && (
+                                        <div className="relative aspect-[16/9] w-48 rounded-lg overflow-hidden border bg-muted/20">
+                                            <img
+                                                src={slideImages[slide.id] instanceof File ? URL.createObjectURL(slideImages[slide.id]) : slideImages[slide.id]}
+                                                className="w-full h-full object-cover"
+                                                alt={slide.label}
+                                            />
+                                            <button
+                                                onClick={() => setSlideImages(prev => ({ ...prev, [slide.id]: null }))}
+                                                className="absolute top-2 right-2 p-1 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                        </div>
+                                    )}
+
+                                    <textarea
+                                        className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 text-xs min-h-[80px] focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-400"
+                                        placeholder={`${slide.label}에 들어갈 구체적인 내용을 적어주세요...`}
+                                        value={slidePrompts[slide.id]}
+                                        onChange={(e) => setSlidePrompts(prev => ({ ...prev, [slide.id]: e.target.value }))}
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
 
                     {/* Admin Curated Prompts Section */}
                     <div className="space-y-4">
@@ -483,24 +770,6 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                         </div>
                     </div>
 
-                    {/* Mood Board Section */}
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-2 text-slate-400">
-                            <ImageIcon className="w-3 h-3" />
-                            <span className="text-[10px] font-bold uppercase tracking-widest">Mood Board</span>
-                        </div>
-                        <div className="grid grid-cols-1 gap-4">
-                            {(TEMPLATES.find(t => t.adminReferences)?.adminReferences?.images || [
-                                "/ref_minimalist_aesthetic.png",
-                                "/ref_vibrant_gradient.png",
-                                "/ref_dark_premium.png"
-                            ]).map((img, i) => (
-                                <div key={i} className="group relative aspect-[16/9] rounded-xl overflow-hidden border bg-slate-50 shadow-sm">
-                                    <img src={img} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Reference" />
-                                </div>
-                            ))}
-                        </div>
-                    </div>
                 </div>
 
                 <div className="p-6 border-t bg-muted/50">
@@ -533,7 +802,7 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
 
                         {/* TextArea */}
                         <textarea
-                            placeholder="Describe your presentation topic..."
+                            placeholder="전체적인 발표 주제와 핵심 내용을 설명해주세요..."
                             className="w-full bg-transparent border-none outline-none text-base p-4 min-h-[80px] resize-none placeholder:text-muted-foreground/60 scrollbar-hide"
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
@@ -545,7 +814,7 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                         />
 
                         {/* Combined Active Chips & File Preview Area */}
-                        {(attachedFile || logoFile || primaryColor !== '#3b82f6' || domain || subDomain || style || ratio) && (
+                        {(attachedFile || logoFile || primaryColor !== '#3b82f6' || domain || subDomain || requestType || style || ratio || Object.values(slidePrompts).some(p => p.length > 0)) && (
                             <div className="px-4 pb-3 flex flex-wrap gap-2 animate-in slide-in-from-top-2 duration-200">
                                 {attachedFile && (
                                     <div className="inline-flex items-center gap-2 px-2.5 py-1 bg-muted/80 rounded-md text-xs font-medium border">
@@ -578,10 +847,10 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                                 {/* 2. Option Button (Dialog Trigger) */}
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 text-xs font-medium", (logoFile || domain || subDomain || primaryColor !== '#3b82f6' || style || ratio) && "border-primary text-primary bg-primary/5")}>
+                                        <Button variant="outline" size="sm" className={cn("h-8 gap-2 text-xs font-medium", (logoFile || domain || subDomain || requestType || primaryColor !== '#3b82f6' || style || ratio) && "border-primary text-primary bg-primary/5")}>
                                             <Settings2 className="w-3.5 h-3.5" />
                                             <span>Option</span>
-                                            {(logoFile || domain || subDomain || primaryColor !== '#3b82f6' || style || ratio) && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
+                                            {(logoFile || domain || subDomain || requestType || primaryColor !== '#3b82f6' || style || ratio) && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent className="sm:max-w-[700px] h-[500px] p-0 flex flex-col gap-0 overflow-hidden">
@@ -630,14 +899,18 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
 
                                 {/* 3. Prompt (Reference) Button */}
                                 <Button
-                                    variant={referenceImages.length > 0 ? "secondary" : "ghost"}
+                                    variant={Object.values(slideImages).some(img => img !== null) ? "secondary" : "ghost"}
                                     size="sm"
-                                    className={cn("h-8 gap-2 text-xs font-medium", referenceImages.length > 0 && "text-primary bg-primary/10")}
+                                    className={cn("h-8 gap-2 text-xs font-medium", Object.values(slideImages).some(img => img !== null) && "text-primary bg-primary/10")}
                                     onClick={() => setShowRefPanel(true)}
                                 >
                                     <Library className="w-3.5 h-3.5" />
                                     <span>프롬프트</span>
-                                    {referenceImages.length > 0 && <span className="bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center">{referenceImages.length}</span>}
+                                    {Object.values(slideImages).filter(img => img !== null).length > 0 && (
+                                        <span className="bg-primary text-primary-foreground text-[10px] w-4 h-4 rounded-full flex items-center justify-center">
+                                            {Object.values(slideImages).filter(img => img !== null).length}
+                                        </span>
+                                    )}
                                 </Button>
                             </div>
 
@@ -645,7 +918,27 @@ const Dashboard = ({ onSelectTemplate, onGenerateStart, theme = 'light', ratio =
                             <div className="ml-auto">
                                 <Button
                                     className="rounded-xl px-4 h-9 font-semibold text-xs shadow-md transition-all hover:scale-105 active:scale-95 bg-foreground text-background hover:bg-foreground/90"
-                                    onClick={() => prompt && onGenerateStart(prompt, parseInt(slideCount), attachedFile, { logo: logoFile, primaryColor, domain: domain || 'Public', subDomain: subDomain || 'General', style: style || 'Minimalist', ratio: ratio || '16:9' }, referenceImages)}
+                                    onClick={() => prompt && onGenerateStart(
+                                        prompt,
+                                        parseInt(slideCount),
+                                        attachedFile,
+                                        {
+                                            logo: logoFile,
+                                            clientLogo: clientLogoFile,
+                                            character: characterFile,
+                                            primaryColor,
+                                            domain: domain || 'Public',
+                                            subDomain: subDomain || 'General',
+                                            requestType: requestType || '제안/제언',
+                                            style: style || 'Minimalist',
+                                            ratio: ratio || '16:9'
+                                        },
+                                        [], // Remove referenceImages
+                                        null, // template
+                                        slidePrompts,
+                                        attachedPdf,
+                                        slideImages
+                                    )}
                                     disabled={!prompt}
                                 >
                                     <Sparkles className="w-3.5 h-3.5 mr-2 fill-current" />

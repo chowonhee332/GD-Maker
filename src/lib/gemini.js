@@ -25,64 +25,68 @@ const fileToGenerativePart = async (file) => {
   });
 };
 
-export const generatePresentationContent = async (topic, config, visualAssets = [], curatedGuidance = "") => {
+export const generatePresentationContent = async (topic, config, visualAssets = [], curatedGuidance = "", slidePrompts = null, slideImages = null) => {
   if (!genAI) throw new Error("API Key not set");
+
+  const requestType = config?.options?.requestType || '제안/제언';
 
   // Define the prompt for generation
   const promptText = `
-    You are a world-class presentation designer known for "Google Material Design 3 (Material You) Aesthetics".
+    You are a world-class presentation designer and editorial director.
     Topic: "${topic}"
+    Request Type (Document Purpose): "${requestType}"
     
-    [DESIGN PHILOSOPHY]:
-    - **Structure**: STRICTLY follow clean, high-contrast, wide-margin presentation layouts.
-    - **Aesthetic**: "Material Design 3, Flat, Accessible, Friendly". 
-    - **Colors**: Use bright pastel backgrounds (e.g. #FEFBFA, #F3F4F9, #EADDFF) with high-contrast text. DO NOT use dark mode or gradients unless specifically requested.
-    - **Vibe**: Trustworthy, Modern, Google-like, Clean.
-
-    [CONTEXT]:
-    Audience: ${config.audience} | Purpose: ${config.purpose} | Tone: ${config.tone}
-    Industry: ${config.domain || 'General'} | Primary Color: ${config.primaryColor || '#0B57D0'}
-
-    [VISUAL REQUIREMENTS]:
-    For EACH slide, provide specific design metadata:
-    1. 'icon': A Lucide React icon name (e.g., "TrendingUp", "Shield", "Zap").
-    2. 'layoutStyle': STRICTLY one of: "cover-premium", "section-glass", "content-card", "content-split", "content-process".
-    3. 'visualElement': A detailed description of the main visual (e.g., "A clean geometric vector illustration of teamwork").
-    4. 'theme': An object containing:
-       - 'bg': Background color (HEX). MUST be a light Material 3 container color (e.g., #FEFBFA, #F3F4F9).
-       - 'text': Contrast text color (HEX). MUST be a dark on-surface color (e.g., #1C1B1F).
-       - 'accent': A primary accent color (HEX) from the Material 3 palette (e.g., #0B57D0, #6750A4).
-       - 'cardBg': A solid flat card color (HEX), usually #FFFFFF.
-    5. 'accentShape': A style token: "pill", "rounded-card", "flat-circle", or "clean-line".
-    6. 'designRationale': A brief explanation of why this specific Material 3 design (color/layout) was chosen for THIS slide.
+    [DOCUMENT PURPOSE INSTRUCTION]:
+    - Adjust the tone, depth, and structure of the content to perfectly match the Request Type.
+    - "제안/제언 (Proposal)": Persuasive, detailed, focus on value propositions, solutions, and strategic benefits.
+    - "발표본 (Presentation)": Concise, highly visual, focus on key talking points, bulleted lists, and impactful statements.
+    - "요약서 (Summary)": Brief, executive-level focus, key insights, and bottom-line conclusions.
     
+    [DESIGN PHILOSOPHY - PREMIUM EDITORIAL]:
+- **Mimicry vs. Reuse**: The provided images are for **STYLE REFERENCE ONLY**. 
+- **DO NOT** reuse the content or actual images from the reference. Instead, analyze their "Vibe" (e.g., clean white space, thin lines, minimalist photography).
+- **Default Theme**: Favor "Premium Light" (White/Soft Gray backgrounds) unless Dark Mode is explicitly requested. Avoid heavy dark gradients.
+- **Layout Choices (STRICT ADHERENCE REQUIRED)**: 
+  - "premium-cover-spoke": **(MANDATORY for COVER slides)**. Solid black background, large bold typography at bottom-left, spoke graphic on the right.
+  - "premium-agenda-spoke": **(MANDATORY for INDEX/AGENDA slides)**. White background, starburst graphic top-right, central agenda list.
+  - "premium-section-spoke": **(MANDATORY for SECTION Break / 간지 slides)**. Beige background (#DBD7CA), CHAPTER number + Title at bottom-left, spoke graphic on the right.
+  - "modern-editorial": **(DEFAULT for ALL BODY / 속지 slides)**. High-fidelity grid layout with distinct title area and large visual asset.
+  - "data-focus": Only for complex data/charts.
+
+    [PRECISE SCHEMAS]:
+    1. 'type': "cover", "index", "section", "body1", "body2"
+    2. 'title', 'subtitle', 'content' (Professional & Insightful)
+    3. 'visualPrompt': Detailed image generation prompt.
+    4. 'layoutStyle': Must be exactly one of: "premium-cover-spoke" (Cover), "premium-agenda-spoke" (Index), "premium-section-spoke" (Divider), "modern-editorial" (Body)
+    5. 'layoutProps': {
+        "headerBadge": "Short label (e.g. INSIGHT, ANALYSIS, STRATEGY, HIGHLIGHT)",
+        "accentNote": "Supporting bold info",
+        "themeMode": "light" | "dark"
+    }
+
     [CONTENT REQ]:
-    - LANGUAGE: **Strictly use ENGLISH** for all text fields, unless the user explicitly requested otherwise.
-    - **Cover Slide**: Must have a catchy Title and a solid Subtitle.
-    - **Index Slide (Table of Contents)**: The 'content' should be a numbered list of topics separated by newlines (e.g., "1. Introduction\n2. Market Analysis").
-    - **Divider Slide**: Used to separate major sections. Use a very short, impactful Title (1-2 words) and a brief Subtitle.
-    - **Content Slides (body1, body2)**: Must have a valid 'content' field with 3-4 bullet points or a short paragraph. NEVER return empty content. Validate if chartData is needed.
+- **Topic Context**: Use "${topic}" as the core. 
+- **Language**: English for slide content, Korean for 'assistantMessage'.
+- **Design Intent**: Enforce a High-Density, Premium Editorial aesthetic. Use concise but deeply professional business language. Titles must be bold and short (Max 4 words). Body text must be dense, analytical, and informative.
+- **Strict Layout Mapping**:
+   - Cover Slide -> MUST use "premium-cover-spoke". Content should be highly strategic.
+   - Index/Agenda -> MUST use "premium-agenda-spoke".
+   - Section Divider -> MUST use "premium-section-spoke".
+   - General Content -> MUST use "modern-editorial". Body content must be at least 3-4 sentences of deep analysis.
 
-    JSON OBJECT ONLY (Ensure all values are in English unless requested):
+    JSON OBJECT ONLY:
     {
-      "title": "메인 프로젝트 제목",
-      "subtitle": "부제목",
-      "designStrategy": "분석된 맥락에 따른 시각적 전략 요약 (한국어)",
+      "title": "...",
       "slides": [
         { 
-          "type": "cover" | "index" | "divider" | "body1" | "body2", 
-          "title": "슬라이드 제목", 
-          "subtitle": "슬라이드 부제목 (선택)",
-          "content": "본문 내용 (필수)", 
-          "icon": "...", 
-          "layoutStyle": "...",
-          "visualElement": "시각적 요소 설명",
-          "theme": { "bg": "...", "text": "...", "accent": "...", "cardBg": "..." },
-          "accentShape": "...",
-          "designRationale": "디자인 의도 설명",
-          "chartData": [{"name": "항목1", "value": 10}, ...]
-        },
-        ...
+          "type": "...", 
+          "title": "...", 
+          "content": "Line 1\\n\\nLine 2", 
+          "visualPrompt": "Detailed English prompt for NEW image generation",
+          "layoutStyle": "modern-editorial",
+          "layoutProps": { "themeMode": "light", ... },
+          "styleTokens": { "bgBase": "#FFFFFF", "textColor": "#1A1A1A", "primaryColor": "#00C73C" }
+        }
       ]
     }
   `;
@@ -91,47 +95,50 @@ export const generatePresentationContent = async (topic, config, visualAssets = 
   const imageParts = await Promise.all(visualAssets.map(fileToGenerativePart));
   const inputParts = [promptText, ...imageParts];
 
-  // Strategy: Gemini 3 Pro Preview (Primary) -> Gemini 2.5 Pro (Fallback) -> Gemini 2.0 Flash (Speed)
+  // Strategy: Main Brain - Planner (using available 2.5-flash acting as Pro)
   try {
-    // 1. Try Gemini 3 Pro Preview (Most Powerful)
-    const model3Pro = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
-    const result = await model3Pro.generateContent(inputParts);
-    const response = await result.response;
-    return parseGeminiResponse(await response.text());
-  } catch (error3Pro) {
-    console.warn("Gemini 3 Pro Preview failed, attempting fallback to 2.5 Pro:", error3Pro.message);
-
+    console.log(`[Gemini Planner] Planning slide structure for topic: "${topic}"...`);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    const result = await model.generateContent(inputParts);
+    return parseGeminiResponse(await result.response.text());
+  } catch (err) {
+    console.error("[Gemini] Primary Generation failed:", err.message);
+    console.warn("Generation: Planner failed, trying fallback:", err.message);
     try {
-      // 2. Fallback to Gemini 2.5 Pro (Stable High Quality)
-      const model25Pro = genAI.getGenerativeModel({ model: "gemini-2.5-pro" });
-      const result = await model25Pro.generateContent(inputParts);
-      const response = await result.response;
-      return parseGeminiResponse(await response.text());
-    } catch (error25Pro) {
-      console.warn("Gemini 2.5 Pro failed, attempting fallback to 2.0 Flash:", error25Pro.message);
-
-      try {
-        // 3. Fallback to Gemini 2.0 Flash (Fast & Reliable)
-        const model2Flash = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-        const result = await model2Flash.generateContent(inputParts);
-        const response = await result.response;
-        return parseGeminiResponse(await response.text());
-      } catch (finalError) {
-        console.error("All Gemini models failed:", finalError);
-        throw finalError;
-      }
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+      const result = await model.generateContent(inputParts);
+      return parseGeminiResponse(await result.response.text());
+    } catch (finalErr) {
+      console.error("[Gemini] All generation models failed. Final Error:", finalErr.message);
+      throw finalErr;
     }
   }
 };
 
 const parseGeminiResponse = (text) => {
-  let cleanedText = text.trim();
-  if (cleanedText.startsWith('```json')) {
-    cleanedText = cleanedText.replace(/^```json/, '').replace(/```$/, '');
-  } else if (cleanedText.startsWith('```')) {
-    cleanedText = cleanedText.replace(/^```/, '').replace(/```$/, '');
+  try {
+    let cleanedText = text.trim();
+    // Remove Markdown code blocks
+    cleanedText = cleanedText.replace(/^```json\n?/, '').replace(/\n?```$/, '').trim();
+
+    // Fix common JSON truncation or unescaped characters
+    // (Basic attempt to close open braces if truncated)
+    let openBraces = (cleanedText.match(/\{/g) || []).length;
+    let closeBraces = (cleanedText.match(/\}/g) || []).length;
+    if (openBraces > closeBraces) {
+      cleanedText += '}'.repeat(openBraces - closeBraces);
+    }
+
+    return JSON.parse(cleanedText);
+  } catch (err) {
+    console.error("JSON Parse Error. Raw text:", text);
+    // Attempt a more aggressive clean if first pass fails
+    try {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (match) return JSON.parse(match[0]);
+    } catch (innerErr) { }
+    throw new Error("Failed to parse AI response: " + err.message);
   }
-  return JSON.parse(cleanedText.trim());
 };
 
 export const generateVisualAsset = async (prompt, type) => {
@@ -153,36 +160,42 @@ export const generateVisualAsset = async (prompt, type) => {
 
   const fullPrompt = `${systemPrompt} Subject: ${prompt}`;
 
-  // NOTE: Assuming there might be an 'imagen' model or similar available via the generic method
-  // or we fallback to text for this demo if not available.
+  console.log("[Visual Editor] Generating visual asset for:", fullPrompt);
+
   try {
-    // Attempting to use a model that might support images, or just standard flash to get a text description
-    // which we might placeholder-ize. 
-    // Ideally, this calls a text-to-image endpoint.
+    const model = genAI.getGenerativeModel({ model: "imagen-3.0-generate-001" });
+    const response = await model.generateContent({
+      contents: [
+        { role: 'user', parts: [{ text: fullPrompt }] }
+      ],
+      generationConfig: {
+        responseModalities: ["IMAGE"]
+      }
+    });
 
-    // For this specific demo, since we cannot guarantee an Image Generation model access 
-    // via standard key without specific whitelisting, we will mock the "Image Generation" 
-    // by returning a placeholder image URL based on keywords, 
-    // OR we can try 'gemini-pro-vision' if it supported output (it doesn't).
+    const result = await response.response;
+    for (const part of result.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return {
+          success: true,
+          imageUrl: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`,
+          prompt: fullPrompt
+        };
+      }
+    }
 
-    // Let's simulating a delay and returning a placeholder for now to ensure UI works,
-    // as debugging API capabilities specifically for ImageGen is complex without interactive testing.
+    throw new Error("No image data returned from generation.");
+  } catch (error) {
+    console.error("[Gemini] Asset Generation Error:", error.message);
+    console.warn("Falling back to placeholder image...");
+    const seed = Math.floor(Math.random() * 1000);
+    const searchUrl = `https://picsum.photos/seed/${seed}/1200/800`;
 
-    console.log("Generating asset with prompt:", fullPrompt);
-
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-
-    // Return a dynamic placeholder based on the prompt keywords
-    // We can use https://placehold.co or similar, or just a generic asset.
     return {
       success: true,
-      imageUrl: `https://placehold.co/600x400/png?text=${encodeURIComponent(type + ": " + prompt)}`,
+      imageUrl: searchUrl,
       prompt: fullPrompt
     };
-
-  } catch (error) {
-    console.error("Asset Generation Error:", error);
-    throw error;
   }
 };
 export const refinePresentationContent = async (currentContent, message, visualAssets = []) => {
@@ -201,72 +214,201 @@ export const refinePresentationContent = async (currentContent, message, visualA
     User's Request:
     "${message}"
     
-    Guidelines:
-    - Only modify the parts requested by the user. Keep everything else as is.
-    - If the user wants to add a slide, add it to the 'slides' array.
-    - If the user wants to change the tone or detail, update the corresponding text fields.
-    - **Visuals**: If the user asks to use a specific image or asset from the 'Available Visual Assets', copy its 'url' to a new 'backgroundImage' property of the relevant slide.
-    - Return the FULL updated JSON object in the same structure.
+    [AGENT BEHAVIOR]:
+    1. Determine if the user wants to **modify slides** (action: "refine") or **just talk/ask questions** (action: "chat").
+    2. If the user asks to "Change", "Modify", "FIX", "Update", or "Apply [USE_ASSET]", set action to "refine".
     
-    JSON Format Structure:
-    {
-      "title": "Main Project Title",
-      "subtitle": "Subtitle",
-      "designStrategy": "...",
-      "slides": [
-        { 
-          "type": "cover", 
-          "title": "...", 
-          "content": "...", 
-          "icon": "...",
-          "layoutStyle": "...",
-          "theme": { "bg": "...", "text": "...", "accent": "..." },
-          "accentShape": "...",
-          "designRationale": "...",
-          "backgroundImage": "url_from_assets_if_requested" 
-        },
-        ...
-      ]
-    }
-    
-    CRITICAL: Return ONLY the JSON. No markdown tags, no explanations.
+    [ASSET USAGE & LAYOUT ENGINE]:
+    - If [USE_ASSET: url] is provided alongside the user's message:
+      1. Set the 'visualElement' property of the target slide exactly to the provided URL (e.g., "visualElement": "https://...").
+      2. Analyze the image type (e.g., photo vs. isolated 3D icon with a white/transparent background).
+      3. Set 'imagePlacement' based on context:
+         - "icon-floating": Use for 3D icons, characters, or small graphics that should float next to text.
+         - "background-cover": Use for wide, high-quality photos meant as a backdrop.
+         - "split-right": Use for landscape photos that need their own structural half.
+      4. Set 'imageBlendMode' based on the image's background and the slide's theme:
+         - "multiply": CRITICAL for 3D icons or cutouts with white backgrounds being placed on dark or colored slides (removes the white box artifact).
+         - "normal": Default for photos or images with intentional backgrounds.
+      5. Contextual Theming: Analyze the image's dominant color (e.g., Blue) and update the slide's 'theme.accent' to match it, ensuring visual harmony.
+
+    [STRICT TARGETING]:
+    - If 'refine', ONLY modify the slide matching '[TARGET_SLIDE: type]'. Never touch other slides.
+    - JSON OUTPUT SCHEMA for modified slides must now include:
+      "visualElement": "...", "imagePlacement": "...", "imageBlendMode": "..."
+    - Keep the output as high-fidelity JSON.
   `;
 
-  // Strategy: Gemini 3 Pro Preview -> Gemini 3 Deep Think -> Gemini 3 Flash Preview -> Gemini 1.5 Pro
+  // Prepare input parts (Prompt text + Image parts)
+  const imageParts = await Promise.all(visualAssets.filter(asset => {
+    // 필터 조건 완화: File 객체이거나 url에 data:image가 포함된 경우 모두 허용
+    return asset instanceof File || (asset.url && asset.url.startsWith('data:image'));
+  }).map(asset => {
+    if (asset instanceof File) return fileToGenerativePart(asset);
+    // data:image/png;base64,.... 에서 정확히 데이터 부분만 추출하도록 수정
+    const base64Data = asset.url.includes(',') ? asset.url.split(',')[1] : asset.url;
+    return { inlineData: { data: base64Data, mimeType: 'image/png' } };
+  }));
+
+  const inputParts = [prompt, ...imageParts];
+
+  // Strategy: High-speed Engine (Refiner)
+  // - For single-slide refinement, tone changing, summarization
+  const primaryModelName = "gemini-2.5-flash";
+  const fallbackModelName = "gemini-2.0-flash";
+
   try {
-    const model3Pro = genAI.getGenerativeModel({ model: "gemini-3-pro-preview" });
-    const result = await model3Pro.generateContent(prompt);
-    const response = await result.response;
-    return parseGeminiResponse(response.text());
-  } catch (error3Pro) {
-    console.warn("Refine: Gemini 3 Pro Preview failed, fallback to Deep Think", error3Pro.message);
-
+    const model = genAI.getGenerativeModel({ model: primaryModelName });
+    const result = await model.generateContent(inputParts);
+    return parseGeminiResponse(await result.response.text());
+  } catch (err) {
+    console.warn(`Refine: ${primaryModelName} failed, trying fallback ${fallbackModelName}:`, err.message);
     try {
-      const model3Deep = genAI.getGenerativeModel({ model: "gemini-3-deep-think" });
-      const result = await model3Deep.generateContent(prompt);
-      const response = await result.response;
-      return parseGeminiResponse(response.text());
-    } catch (error3Deep) {
-      console.warn("Refine: Gemini 3 Deep Think failed, fallback to Flash Preview", error3Deep.message);
+      const model = genAI.getGenerativeModel({ model: fallbackModelName });
+      const result = await model.generateContent(inputParts);
+      return parseGeminiResponse(await result.response.text());
+    } catch (finalErr) {
+      console.error("All refinement models failed:", finalErr.message);
+      throw finalErr;
+    }
+  }
+};
 
-      try {
-        const model3Flash = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
-        const result = await model3Flash.generateContent(prompt);
-        const response = await result.response;
-        return parseGeminiResponse(response.text());
-      } catch (error3Flash) {
-        console.warn("Refine: Gemini 3 Flash Preview failed, fallback to 1.5 Pro", error3Flash.message);
+/**
+ * True Background Removal & Image Composition Engine
+ * Uses "gemini-3-pro-image-preview" with "IMAGE" response modality to literally return a new transparent PNG pixel data.
+ */
+export const editVisualAsset = async (imageAsset, prompt, themeParams = {}) => {
+  if (!genAI) throw new Error("API Key not set");
 
-        try {
-          const model15Pro = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-          const result = await model15Pro.generateContent(prompt);
-          const response = await result.response;
-          return parseGeminiResponse(response.text());
-        } catch (flashError) {
-          console.error("Refine Gemini Error Details:", flashError.response ? flashError.response.data : flashError.message);
-          throw flashError;
-        }
+  // Format the image for Gemini
+  let imagePart;
+  if (imageAsset instanceof File) {
+    imagePart = await fileToGenerativePart(imageAsset);
+  } else if (imageAsset.url && imageAsset.url.startsWith('data:image')) {
+    const base64Data = imageAsset.url.includes(',') ? imageAsset.url.split(',')[1] : imageAsset.url;
+    imagePart = { inlineData: { data: base64Data, mimeType: 'image/png' } };
+  } else {
+    throw new Error("Invalid image format provided for background removal.");
+  }
+
+  // Construct precise editing instructions
+  const editingPrompt = `
+    Using the provided image, apply the following modifications:
+    ${prompt}
+
+    Additional Theme Constraints:
+    - Target Slide Background Tone: ${themeParams.themeMode || 'dark'}
+    - Accent Color to Match: ${themeParams.accentColor || '#D1D1C4'}
+    
+    CRITICAL: Ensure the subject is perfectly extracted, leaving the background 100% transparent. Return a high-quality PNG.
+  `;
+
+  const inputParts = [imagePart, editingPrompt];
+
+  console.log("[Visual Editor] Starting True Background Removal & Editing");
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-3-pro-image-preview" });
+    const response = await model.generateContent({
+      contents: inputParts,
+      generationConfig: {
+        responseModalities: ["IMAGE"]
+      }
+    });
+
+    const result = await response.response;
+    for (const part of result.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return {
+          success: true,
+          base64Data: part.inlineData.data,
+          mimeType: part.inlineData.mimeType || 'image/png',
+          dataUrl: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`
+        };
       }
     }
+    throw new Error("No image data returned from Nano Banana Pro (gemini-3-pro-image-preview).");
+  } catch (err) {
+    console.error("[Gemini] True Background Removal failed:", err.message);
+    throw err;
+  }
+};
+
+/**
+ * Full Slide Image Generation Engine
+ * Uses "gemini-3-pro-image-preview" with "IMAGE" response modality to render a complete slide incorporating both visual concept and text.
+ */
+export const generateSlideImage = async (slideData, themeParams = {}, referenceImage = null) => {
+  if (!genAI) throw new Error("API Key not set");
+
+  // Construct a prompt leveraging the AI-generated visualPrompt
+  const slidePrompt = `
+    Create a HIGH-RESOLUTION (1K), perfectly formatted presentation slide (16:9 aspect ratio).
+    You must embed the following text exactly as requested into the image itself.
+    
+    Slide Type: ${slideData.type}
+    Theme Mode: ${themeParams.themeMode || 'light'}
+    Accent Color: ${themeParams.accentColor || '#3B82F6'}
+    
+    [VISUAL CONCEPT AUTOMATICALLY GENERATED BY AI]:
+    ${slideData.visualPrompt || 'Professional corporate look'}
+
+    [EXACT TEXT TO RENDER ON IMAGE]:
+    Title: "${slideData.title}"
+    ${slideData.subtitle ? `Subtitle: "${slideData.subtitle}"` : ''}
+    ${slideData.content ? `Body Text:\n${slideData.content}` : ''}
+    
+    [DESIGN INSTRUCTIONS]:
+    Make it look like a highly professional corporate presentation. Strictly follow the [VISUAL CONCEPT] above to create the visual elements, background, and mood. Ensure the typography is clean, contrast is readable, and the text MUST be prominently displayed over the visuals. Provide a beautiful layout that balances text readability and the visual assets seamlessly.
+  `;
+
+  let modelName = "imagen-3.0-generate-001";
+  let finalPrompt = slidePrompt;
+
+  if (referenceImage) {
+    console.log(`[Gemini Image Gen] Using Nano Banana Pro for slide: ${slideData.type} with reference image.`);
+    modelName = "gemini-3-pro-image-preview";
+
+    finalPrompt += `\n\n[CRITICAL REFERENCE IMAGE INSTRUCTION]:
+    An image is attached to this prompt. You MUST use this attached image as your PRIMARY DESIGN REFERENCE.
+    - Copy the EXACT structural layout, visual style, and composition of the attached image.
+    - Adapt the colors to match the [Theme Mode] and [Accent Color] if necessary, but keep the core aesthetic identical to the reference.
+    - Embed the [EXACT TEXT TO RENDER ON IMAGE] perfectly into the design, replacing any placeholder texts in the reference.
+    - DO NOT generate a completely different design; use the reference as your blueprint!`;
+  } else {
+    console.log(`[Gemini Image Gen] Generating full slide using Imagen 3 for type: ${slideData.type}`);
+  }
+
+  let inputParts = [{ text: finalPrompt }];
+
+  if (referenceImage && referenceImage instanceof File) {
+    const imagePart = await fileToGenerativePart(referenceImage);
+    if (imagePart) inputParts.unshift(imagePart);
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: modelName });
+    const response = await model.generateContent({
+      contents: [
+        { role: 'user', parts: inputParts }
+      ],
+      generationConfig: {
+        responseModalities: ["IMAGE"]
+      }
+    });
+
+    const result = await response.response;
+    for (const part of result.candidates[0].content.parts) {
+      if (part.inlineData) {
+        return {
+          success: true,
+          dataUrl: `data:${part.inlineData.mimeType || 'image/png'};base64,${part.inlineData.data}`
+        };
+      }
+    }
+    throw new Error("No image data returned from imagen-3.0-generate-001 generation.");
+  } catch (err) {
+    console.error(`[Gemini Image Gen] Failed for slide ${slideData.type}:`, err.message);
+    throw err;
   }
 };
