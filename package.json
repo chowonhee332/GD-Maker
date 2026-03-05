@@ -17,11 +17,8 @@
     "@mui/material": "^7.3.8",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-<<<<<<< HEAD
     "framer-motion": "^12.34.3",
-=======
     "html2canvas": "^1.4.1",
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
     "lucide-react": "^0.563.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",

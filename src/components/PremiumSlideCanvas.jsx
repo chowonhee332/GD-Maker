@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Maximize2, Sparkles, LayoutGrid } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Maximize2, Sparkles, LayoutGrid, Layout as LayoutIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -228,16 +228,159 @@ const DividerLayout = ({ slide, theme }) => {
     );
 };
 
+// --- Premium Editorial (Spoke) Layouts ---
+
+const PremiumCoverSpoke = ({ slide, theme, projectName }) => {
+    return (
+        <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none bg-black text-[#D1D1C4] font-sans">
+            <div className="flex justify-between items-start z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{projectName}</span>
+            </div>
+            <div className="absolute top-1/2 -right-24 -translate-y-1/2 w-[60%] h-[100%] opacity-50 pointer-events-none">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-current">
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" strokeWidth="0.25" />
+                </svg>
+            </div>
+            <div className="max-w-[80%] z-10 flex flex-col mt-auto mb-4">
+                <h1 className="font-bold tracking-[-0.05em] leading-[1.05] uppercase text-[#D1D1C4]" style={{ fontSize: '3.25rem' }}>
+                    {(slide.title || "STRATEGY PROPOSAL").split(' ').map((word, i) => (
+                        <div key={i} className="whitespace-nowrap">{word}</div>
+                    ))}
+                </h1>
+            </div>
+            <div className="flex justify-between items-end z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{slide.subtitle || "CONFIDENTIAL"}</span>
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium text-right">
+                    {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
+                </span>
+            </div>
+        </div>
+    );
+};
+
+const PremiumAgendaSpoke = ({ slide, projectName }) => {
+    const items = slide.content ? slide.content.split('\n').filter(l => l.trim()) : [];
+    return (
+        <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none bg-white text-black font-sans">
+            <div className="flex justify-between items-start z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{projectName}</span>
+            </div>
+            <div className="absolute top-4 -right-20 w-[45%] h-[45%] opacity-90 pointer-events-none text-black">
+                <svg viewBox="0 0 100 100" className="w-full h-full">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                        <line
+                            key={i}
+                            x1="50" y1="50"
+                            x2={50 + 45 * Math.cos((i * 22.5) * Math.PI / 180)}
+                            y2={50 + 45 * Math.sin((i * 22.5) * Math.PI / 180)}
+                            stroke="currentColor"
+                            strokeWidth="0.5"
+                        />
+                    ))}
+                </svg>
+            </div>
+            <div className="z-10 mt-4">
+                <h1 className="text-[4rem] font-bold tracking-tight uppercase">AGENDA</h1>
+            </div>
+            <div className="max-w-[85%] z-10 flex flex-col gap-2 mt-auto mb-16">
+                {items.map((item, i) => (
+                    <div key={i} className="text-[1.25rem] font-medium tracking-tight whitespace-nowrap">{item}</div>
+                ))}
+            </div>
+            <div className="flex justify-between items-end z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{slide.subtitle || "CONTENTS"}</span>
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium text-right">
+                    {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
+                </span>
+            </div>
+        </div>
+    );
+};
+
+const PremiumSectionSpoke = ({ slide, projectName }) => {
+    return (
+        <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none bg-[#DBD7CA] text-black font-sans">
+            <div className="flex justify-between items-start z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{projectName}</span>
+            </div>
+            <div className="absolute top-1/2 -right-24 -translate-y-1/2 w-[60%] h-[90%] opacity-100 pointer-events-none">
+                <svg viewBox="0 0 100 100" className="w-full h-full text-black">
+                    <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" strokeWidth="0.25" />
+                    <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" strokeWidth="0.25" />
+                </svg>
+            </div>
+            <div className="max-w-[85%] z-10 flex flex-col mt-auto mb-4">
+                <h1 className="font-bold tracking-[-0.05em] leading-[1.0] uppercase text-black" style={{ fontSize: '3.25rem' }}>
+                    {(slide.title || "NEW SECTION").split(' ').map((word, i) => (
+                        <div key={i} className="whitespace-nowrap">{word}</div>
+                    ))}
+                </h1>
+            </div>
+            <div className="flex justify-between items-end z-10 w-full opacity-60">
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium">{slide.subtitle || "SECTION BREAK"}</span>
+                <span className="text-[11px] font-mono tracking-[0.4em] uppercase font-medium text-right">
+                    {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
+                </span>
+            </div>
+        </div>
+    );
+};
+
+const ModernEditorialLayout = ({ slide, theme, slideImage }) => {
+    const contentParts = slide.content ? slide.content.split('\n\n') : [];
+    const parts = contentParts.length >= 2 ? contentParts : [
+        contentParts[0] || "Discovering strategic insights and market opportunities to drive sustainable growth.",
+        "Our approach ensures high-density, professional content tailored to your specific goals."
+    ];
+    const layoutProps = slide.layoutProps || {};
+
+    return (
+        <div className="relative w-full h-full flex flex-col p-16" style={{ backgroundColor: theme.bg, color: theme.text }}>
+            <div className="flex flex-col gap-4 mb-4">
+                <h2 className="text-[2rem] font-bold tracking-tight leading-tight">{slide.title}</h2>
+                {slide.subtitle && <p className="text-[1.25rem] opacity-60 font-medium">{slide.subtitle}</p>}
+                <div className="h-[2px] w-full rounded-full opacity-10 bg-current mt-2" />
+            </div>
+
+            <div className="flex-1 grid grid-cols-2 gap-16 pt-8">
+                <div className="flex flex-col gap-5">
+                    <p className="opacity-95 text-[1rem] leading-[1.8]">{parts[0]}</p>
+                    <p className="opacity-70 text-[0.875rem] leading-[1.7]">{parts[1]}</p>
+                    {layoutProps.accentNote && (
+                        <div className="mt-auto pt-6 border-t border-current/10">
+                            <p className="font-bold text-[0.875rem]" style={{ color: theme.accent }}>{layoutProps.accentNote}</p>
+                        </div>
+                    )}
+                </div>
+                <div className="h-full rounded-3xl relative overflow-hidden flex items-center justify-center bg-current/5 border border-current/10">
+                    {slideImage ? (
+                        <img src={slideImage} className="w-full h-full object-cover" alt="Slide Visual" />
+                    ) : (
+                        <div className="flex flex-col items-center gap-4 opacity-20">
+                            <LayoutIcon className="w-12 h-12" />
+                            <p className="text-[10px] italic">Visual Asset Area</p>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 // --- Main component ---
 
-const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false }) => {
+const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false, slideImages = {}, projectName = "PROJECT" }) => {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
     const nextSlide = () => setCurrentIndex(p => Math.min((slides?.length || 1) - 1, p + 1));
     const prevSlide = () => setCurrentIndex(p => Math.max(0, p - 1));
 
-    // Handle Keyboard Navigation
     useEffect(() => {
         const handleKeyDown = (e) => {
             if (e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
@@ -250,34 +393,40 @@ const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false }) => 
     if (!slides || slides.length === 0) return null;
 
     const currentSlide = slides[currentIndex];
-
-    // MD3 default theme fallback
     const theme = currentSlide?.theme || {
-        bg: '#FEFBFA', // MD3 light surface
-        text: '#1C1B1F', // MD3 on-surface
-        accent: '#0B57D0', // MD3 primary (Blue)
-        cardBg: '#FFFFFF' // MD3 surface container lowest
+        bg: '#FEFBFA',
+        text: '#1C1B1F',
+        accent: '#0B57D0',
+        cardBg: '#FFFFFF'
     };
 
     const renderSlideContent = () => {
-        // First strictly enforce by slide.type to guarantee structural pages are correct
+        // [FULL IMAGE OVERRIDE] If we have a fully pre-rendered image for this slide, show it edge-to-edge
+        if (slideImages[currentSlide.type]) {
+            return (
+                <div className="absolute inset-0 w-full h-full bg-black flex items-center justify-center">
+                    <img src={slideImages[currentSlide.type]} className="w-full h-full object-contain" alt="AI Generated Slide" />
+                </div>
+            );
+        }
+
+        const layout = currentSlide.layoutStyle || 'modern-editorial';
+
+        // Custom Layout Mapping
+        if (layout === 'premium-cover-spoke') return <PremiumCoverSpoke slide={currentSlide} theme={theme} projectName={projectName} />;
+        if (layout === 'premium-agenda-spoke') return <PremiumAgendaSpoke slide={currentSlide} projectName={projectName} />;
+        if (layout === 'premium-section-spoke') return <PremiumSectionSpoke slide={currentSlide} projectName={projectName} />;
+        if (layout === 'modern-editorial') return <ModernEditorialLayout slide={currentSlide} theme={theme} slideImage={null} />;
+
+        // Existing Fallbacks
         if (currentSlide.type === 'cover') return <CoverLayout slide={currentSlide} theme={theme} />;
         if (currentSlide.type === 'index') return <IndexLayout slide={currentSlide} theme={theme} />;
         if (currentSlide.type === 'divider') return <DividerLayout slide={currentSlide} theme={theme} />;
 
-        // For body slides, use layoutStyle or fallback
-        const layout = currentSlide.layoutStyle || 'content-card';
-
         switch (layout) {
-            case 'cover-premium':
-            case 'dark-hero':
-                return <CoverLayout slide={currentSlide} theme={theme} />;
-            case 'content-split':
-            case 'showcase':
-                return <ShowcaseLayout slide={currentSlide} theme={theme} />;
-            case 'content-card':
+            case 'cover-premium': return <CoverLayout slide={currentSlide} theme={theme} />;
+            case 'showcase': return <ShowcaseLayout slide={currentSlide} theme={theme} />;
             case 'bento':
-            case 'data-grid':
             default:
                 return <BentoGridLayout slide={currentSlide} theme={theme} />;
         }
@@ -285,15 +434,12 @@ const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false }) => 
 
     return (
         <div
-            className={
-                cn(
-                    "relative flex items-center justify-center bg-zinc-950 overflow-hidden",
-                    isFullscreen ? "fixed inset-0 z-[100]" : "w-full h-full rounded-2xl border border-white/10 shadow-2xl"
-                )
-            }
+            className={cn(
+                "relative flex items-center justify-center overflow-hidden",
+                isFullscreen ? "fixed inset-0 z-[100] bg-zinc-950" : "w-full h-full rounded-2xl border border-white/10 shadow-2xl bg-zinc-950"
+            )}
         >
-            {/* The Canvas (strict aspect ratio preservation) */}
-            < div
+            <div
                 className="relative bg-white overflow-hidden shadow-2xl transition-all duration-500 ease-out"
                 style={{
                     aspectRatio: ratio.replace(':', '/'),
@@ -306,9 +452,9 @@ const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false }) => 
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={currentIndex}
-                        initial={{ opacity: 0, scale: 0.98 }}
+                        initial={previewMode ? { opacity: 1 } : { opacity: 0, scale: 0.98 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 1.02 }}
+                        exit={previewMode ? { opacity: 1 } : { opacity: 0, scale: 1.02 }}
                         transition={{ duration: 0.5, ease: "easeInOut" }}
                         className="w-full h-full"
                     >
@@ -316,72 +462,37 @@ const PremiumSlideCanvas = ({ slides, ratio = '16:9', previewMode = false }) => 
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Progress Bar */}
-                {
-                    !previewMode && (
-                        <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/10 z-50">
-                            <motion.div
-                                className="h-full bg-current opacity-50"
-                                style={{ color: theme.accent }}
-                                animate={{ width: `${((currentIndex + 1) / slides.length) * 100}%` }}
-                                transition={{ duration: 0.3 }}
-                            />
-                        </div>
-                    )
-                }
-
-                {/* Rationale Overlay (Bottom Left) */}
-                {
-                    !previewMode && currentSlide.designRationale && (
-                        <div className="absolute bottom-8 left-8 max-w-sm p-4 rounded-xl bg-black/40 backdrop-blur-md border border-white/10 text-white z-50 opacity-0 hover:opacity-100 transition-opacity">
-                            <p className="text-[10px] font-bold tracking-widest uppercase mb-1 opacity-70" style={{ color: theme.accent }}>Design Rationale</p>
-                            <p className="text-xs italic leading-relaxed">"{currentSlide.designRationale}"</p>
-                        </div>
-                    )
-                }
-            </div >
-
-            {/* Controls (Hover overlay) */}
-            {
-                !previewMode && (
-                    <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-50 opacity-0 hover:opacity-100 transition-opacity group">
-                        <button
-                            onClick={prevSlide}
-                            disabled={currentIndex === 0}
-                            className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center pointer-events-auto disabled:opacity-30 hover:bg-black/70 transition-all"
-                        >
-                            <ChevronLeft className="w-6 h-6" />
-                        </button>
-                        <button
-                            onClick={nextSlide}
-                            disabled={currentIndex === slides.length - 1}
-                            className="w-12 h-12 rounded-full bg-black/50 backdrop-blur-md text-white flex items-center justify-center pointer-events-auto disabled:opacity-30 hover:bg-black/70 transition-all"
-                        >
-                            <ChevronRight className="w-6 h-6" />
-                        </button>
+                {!previewMode && (
+                    <div className="absolute bottom-0 left-0 w-full h-1.5 bg-black/10 z-50">
+                        <motion.div
+                            className="h-full bg-current opacity-50"
+                            style={{ color: theme.accent }}
+                            animate={{ width: `${((currentIndex + 1) / slides.length) * 100}%` }}
+                            transition={{ duration: 0.3 }}
+                        />
                     </div>
-                )
-            }
+                )}
+            </div>
 
-            {/* Top Right Controls */}
-            {
-                !previewMode && (
-                    <div className="absolute top-6 right-6 flex items-center gap-3 z-50">
-                        <div className="px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md text-white/80 text-xs font-medium border border-white/10">
-                            {currentIndex + 1} / {slides.length}
-                        </div>
-                        {!isFullscreen && (
-                            <button
-                                onClick={() => setIsFullscreen(!isFullscreen)}
-                                className="p-2 rounded-full bg-black/50 backdrop-blur-md text-white/80 hover:text-white border border-white/10 transition-colors"
-                            >
-                                <Maximize2 className="w-4 h-4" />
-                            </button>
-                        )}
-                    </div>
-                )
-            }
-        </div >
+            {!previewMode && (
+                <div className="absolute inset-x-4 top-1/2 -translate-y-1/2 flex justify-between pointer-events-none z-50 opacity-0 hover:opacity-100 transition-opacity">
+                    <button
+                        onClick={prevSlide}
+                        disabled={currentIndex === 0}
+                        className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center pointer-events-auto disabled:opacity-30 hover:bg-black/70 transition-all"
+                    >
+                        <ChevronLeft className="w-6 h-6" />
+                    </button>
+                    <button
+                        onClick={nextSlide}
+                        disabled={currentIndex === slides.length - 1}
+                        className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center pointer-events-auto disabled:opacity-30 hover:bg-black/70 transition-all"
+                    >
+                        <ChevronRight className="w-6 h-6" />
+                    </button>
+                </div>
+            )}
+        </div>
     );
 };
 

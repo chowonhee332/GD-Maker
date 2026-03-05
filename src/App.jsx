@@ -559,56 +559,6 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
     } catch (e) {
       toast.error("AI Generation failed. Using premium design placeholders.", { id: "generating" });
 
-<<<<<<< HEAD
-      // Material 3 Demo Fallback Data for Presentation
-      const fallbackSlides = [
-        {
-          type: 'cover',
-          title: 'Project Ignite: Q3 Strategy',
-          subtitle: 'Accelerating Growth with Material You',
-          content: 'A comprehensive overview of our product roadmap, design integration, and business milestones for the upcoming quarter.',
-          theme: { bg: '#EADDFF', text: '#21005D', accent: '#6750A4', cardBg: '#FFFFFF' },
-          layoutStyle: 'cover-premium',
-          icon: 'sparkles',
-          designRationale: 'Using Google Material 3 (M3) Primary Purple container with dark text for a friendly, modern, and accessible introduction.'
-        },
-        {
-          type: 'index',
-          title: 'Agenda',
-          content: '1. Executive Summary\n2. User Experience Updates\n3. Core Technology Stack\n4. Strategic Roadmap\n5. Investment Opportunities',
-          theme: { bg: '#FEFBFA', text: '#1C1B1F', accent: '#0B57D0', cardBg: '#FFFFFF' },
-          designRationale: 'M3 Surface colors (Light/Neutral) combined with the primary Google Blue to maintain high contrast and clear information hierarchy.'
-        },
-        {
-          type: 'divider',
-          title: 'Part 1',
-          subtitle: 'User Experience & Research',
-          theme: { bg: '#FEFBFA', text: '#FFFFFF', accent: '#0B57D0', cardBg: '#FFFFFF' },
-          designRationale: 'Solid Blue (M3 Primary) background provides a strong visual break to refocus audience attention before diving into details.'
-        },
-        {
-          type: 'body1',
-          title: 'Growth Trajectory',
-          content: 'Our new design system has demonstrated a sustained engagement increase of 75% across all platforms. The resulting user satisfaction allows us to scale operations dramatically.',
-          theme: { bg: '#F3F4F9', text: '#1C1B1F', accent: '#0B57D0', cardBg: '#FFFFFF' },
-          layoutStyle: 'bento',
-          chartData: [
-            { name: "Engagement", value: "+75%" },
-            { name: "Task Success", value: "94%" },
-            { name: "Bounce Rate", value: "-22%" }
-          ],
-          designRationale: 'M3 elevated cards (Surface Container Lowest) on a slightly darker background (Surface Container Low) create a clean Bento Grid.'
-        },
-        {
-          type: 'body2',
-          title: 'Modern Architecture',
-          content: 'Integrating Material You dynamic colors reduces design debt by a factor of 10. Our new UI components perfectly adapt to user preferences and accessibility needs.',
-          theme: { bg: '#C2E7FF', text: '#001D35', accent: '#00639B', cardBg: '#FFFFFF' },
-          layoutStyle: 'showcase',
-          visualElement: 'A clean, abstract geometric composition representing interconnected components.',
-          backgroundImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
-          designRationale: 'Split showcase layout combines high-fidelity imagery with M3 Secondary/Tertiary color palettes for a vibrant finish.'
-=======
       // Fallback stylized data for verification - Matching Premium Editorial Strategy
       const fallbackSlides = [
         {
@@ -667,7 +617,6 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
           subtitle: 'You can easily resize these resources without losing quality. To change the color, just ungroup the resource.',
           theme: { bg: '#FDFBF4', text: '#1E1B4B', accent: '#7C3AED' },
           layoutStyle: 'resource-graphics'
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
         }
       ];
       setGeneratedSlides(fallbackSlides);
@@ -915,661 +864,19 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
     const effectiveRatio = ratio || '16:9';
     const ratioClass = effectiveRatio === '16:9' ? 'aspect-[16/9] w-[800px]' : (effectiveRatio === '4:3' ? 'aspect-[4/3] w-[700px]' : 'aspect-square w-[600px]');
 
-<<<<<<< HEAD
-=======
-    const styleTokens = slideData.styleTokens || {};
-    const layoutProps = slideData.layoutProps || {};
-
-    const theme = {
-      bg: styleTokens.bgBase || (layoutProps.themeMode === 'dark' ? '#1E1E1E' : '#FFFFFF'),
-      text: styleTokens.textColor || (layoutProps.themeMode === 'dark' ? '#FFFFFF' : '#1A1A1A'),
-      accent: styleTokens.primaryColor || (slideData.theme?.accent || '#00C73C')
-    };
-
-    const layoutStyle = slideData.layoutStyle || (
-      type === 'cover' ? 'premium-cover-spoke' :
-        type === 'index' ? 'premium-agenda-spoke' :
-          type === 'section' ? 'premium-section-spoke' :
-            'modern-editorial'
-    );
-    const isCover = type === 'cover' || type === 'index' || type === 'section' || layoutStyle?.startsWith('premium-');
-    const bgStyle = layoutProps.backgroundGradient
-      ? { background: layoutProps.backgroundGradient }
-      : { backgroundColor: theme.bg };
-
-    // Responsive Typography Scale
-    const fontScale = effectiveRatio === '16:9' ? 1 : (effectiveRatio === '4:3' ? 0.9 : 0.85);
-
-    const renderContent = () => {
-      if (layoutStyle === 'editorial-split') {
-        const gridCols = layoutProps.contentAlignment === 'right' ? "grid-cols-[2fr,3fr]" : "grid-cols-[3fr,2fr]";
-        return (
-          <div className={cn("h-full grid gap-12 items-center", gridCols)}>
-            <div className="flex flex-col gap-6">
-              {layoutProps.headerBadge && (
-                <div
-                  className="inline-block self-start px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border"
-                  style={{ backgroundColor: theme.accent + '20', color: theme.accent, borderColor: theme.accent + '30' }}
-                >
-                  {layoutProps.headerBadge}
-                </div>
-              )}
-              {/* Title removed from here - already in header */}
-              <div className="opacity-90 font-normal leading-relaxed whitespace-pre-wrap" style={{ fontSize: 'calc(1rem * var(--font-scale))', color: theme.text }}>
-                {slideData.content || "Generating detailed insights for your presentation. We ensure high-density, professional content tailored to your specific topic and strategy."}
-              </div>
-            </div>
-            <div className="h-full rounded-3xl relative overflow-hidden flex items-center justify-center" style={{ backgroundColor: theme.text + '08', border: `1px solid ${theme.text}15` }}>
-              {slideImages[type] ? (
-                <img src={slideImages[type] instanceof File ? URL.createObjectURL(slideImages[type]) : slideImages[type]} className="w-full h-full object-cover" />
-              ) : (
-                <div className="flex flex-col items-center gap-4 opacity-20 text-center">
-                  <LayoutIcon className="w-12 h-12" />
-                  <p className="text-[10px] italic max-w-[200px]">{slideData.visualElement || "Visual Section"}</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'modern-editorial' || layoutStyle === 'mimic-reference') {
-        // High-Fidelity Stacked Layout (Text TOP, Image BOTTOM)
-        const contentParts = slideData.content ? slideData.content.split('\n\n') : [];
-        // Ensure at least two parts for balance
-        const parts = contentParts.length >= 2 ? contentParts : [
-          contentParts[0] || "Discovering strategic insights and market opportunities to drive sustainable growth and competitive advantage in the digital landscape.",
-          "Our approach ensures high-density, professional content tailored to your specific goals and industry requirements."
-        ];
-
-        return (
-          <div className="h-full flex flex-col gap-10">
-            <div className="flex flex-col gap-4">
-              {layoutProps.headerBadge && (
-                <div
-                  className="inline-block self-start px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border mb-2"
-                  style={{ backgroundColor: theme.accent + '15', color: theme.accent, borderColor: theme.accent + '25' }}
-                >
-                  {layoutProps.headerBadge}
-                </div>
-              )}
-              <div className="grid grid-cols-2 gap-16 border-t border-slate-100 pt-8 mt-2">
-                <div className="flex flex-col gap-5">
-                  {parts[0] && (
-                    <p className="opacity-95 font-normal leading-[1.8]" style={{ fontSize: 'calc(1rem * var(--font-scale))', color: theme.text }}>
-                      {parts[0]}
-                    </p>
-                  )}
-                </div>
-                <div className="flex flex-col gap-5 justify-between">
-                  <div>
-                    {parts.slice(1).map((part, i) => (
-                      <p key={i} className="opacity-95 font-normal leading-[1.8] mb-4" style={{ fontSize: 'calc(1rem * var(--font-scale))', color: theme.text }}>
-                        {part}
-                      </p>
-                    ))}
-                  </div>
-                  {layoutProps.accentNote && (
-                    <p className="font-bold text-[calc(1rem*var(--font-scale))] italic border-l-4 pl-4" style={{ color: theme.accent, borderColor: theme.accent }}>
-                      {layoutProps.accentNote}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex-1 rounded-[2.5rem] overflow-hidden relative shadow-2xl border border-white/20 group">
-              {slideImages[type] ? (
-                <img src={slideImages[type] instanceof File ? URL.createObjectURL(slideImages[type]) : slideImages[type]} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-              ) : (
-                <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                  <div className="flex flex-col items-center gap-2 opacity-20">
-                    <ImageIcon className="w-12 h-12" />
-                    <span className="text-[10px] font-bold uppercase tracking-widest italic">{slideData.visualElement || "Hero Asset"}</span>
-                  </div>
-                </div>
-              )}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'data-focus' && slideData.chartData) {
-        return (
-          <div className="h-full flex flex-col gap-8">
-            <h1 className="font-extrabold tracking-tight leading-tight" style={{ fontSize: 'calc(2.5rem * var(--font-scale))', color: theme.text }}>
-              {slideData.title}
-            </h1>
-            <div className="flex-1 grid grid-cols-[1fr,2fr] gap-12 items-center">
-              <div className="flex flex-col gap-4">
-                <p className="opacity-80 font-medium leading-relaxed" style={{ fontSize: 'calc(1.125rem * var(--font-scale))', color: theme.text }}>
-                  {slideData.content}
-                </p>
-                {layoutProps.accentNote && (
-                  <p className="font-bold text-[calc(0.875rem*var(--font-scale))]" style={{ color: theme.accent }}>
-                    {layoutProps.accentNote}
-                  </p>
-                )}
-              </div>
-              <div className="h-full bg-slate-50/50 rounded-3xl p-10 border border-slate-200/50 flex flex-col justify-end">
-                <div className="flex items-end justify-between h-48 gap-4">
-                  {slideData.chartData.map((d, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-4 group">
-                      <div
-                        className="w-full rounded-t-lg transition-all duration-1000 ease-out origin-bottom animate-in slide-in-from-bottom-full"
-                        style={{
-                          height: `${(d.value / Math.max(...slideData.chartData.map(v => v.value))) * 100}%`,
-                          backgroundColor: theme.accent,
-                          boxShadow: `0 10px 30px ${theme.accent}30`
-                        }}
-                      />
-                      <div className="text-center">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{d.name}</p>
-                        <p className="text-[14px] font-black" style={{ color: theme.accent }}>{d.value}%</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'premium-section-spoke' || type === 'section') {
-        const titleText = slideData.title || "NEW SECTION";
-        const sectionIndex = slideData.layoutProps?.sectionIndex || "01";
-        const accentColor = "#000000";
-        return (
-          <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none" style={{ backgroundColor: '#DBD7CA', color: accentColor }}>
-            {/* Top Bar */}
-            <div className="flex justify-between items-start z-10 w-full opacity-60">
-              <span className="text-[9px] font-mono tracking-[0.4em] uppercase font-medium">
-                {projectName || "COMPANY NAME"}
-              </span>
-            </div>
-
-            {/* Middle Section: Spoke Graphic - Reference Centered Positioning */}
-            <div className="absolute top-1/2 -right-24 -translate-y-1/2 w-[60%] h-[90%] opacity-100 pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-black">
-                <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" strokeWidth="0.25" />
-              </svg>
-            </div>
-
-            {/* AI Selected Image Rendering */}
-            {slideImages[type] && (
-              <div
-                className={cn(
-                  "absolute z-0 flex items-center justify-center pointer-events-none fade-in animate-in",
-                  slideData.imagePlacement === 'background-cover' ? "inset-0 w-full h-full opacity-30" :
-                    slideData.imagePlacement === 'split-right' ? "top-0 right-0 w-1/2 h-full opacity-60" :
-                      "top-1/2 right-24 -translate-y-1/2 w-[40%] h-[60%]" // default for icon-floating
-                )}
-                style={{ mixBlendMode: slideData.imageBlendMode === 'multiply' ? 'multiply' : 'normal' }}
-              >
-                <img
-                  src={slideImages[type] instanceof File ? URL.createObjectURL(slideImages[type]) : slideImages[type]}
-                  className={cn(
-                    "max-w-full max-h-full filter drop-shadow-2xl",
-                    slideData.imagePlacement === 'background-cover' ? "object-cover w-full h-full" : "object-contain"
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Title Section: Aligning Left with Reference Typography */}
-            <div className="max-w-[85%] z-10 flex flex-col mt-auto mb-4">
-              <h1 className="font-bold tracking-[-0.05em] leading-[1.0] uppercase text-black" style={{ fontSize: 'calc(3.25rem * var(--font-scale))' }}>
-                {(titleText || "USER RESEARCH SESSION").split(' ').map((word, i) => (
-                  <div key={i} className="whitespace-nowrap">{word}</div>
-                ))}
-              </h1>
-            </div>
-
-            {/* Bottom Bar */}
-            <div className="flex justify-between items-end z-10 w-full opacity-60">
-              <div className="flex flex-col">
-                <span className="text-[9px] font-mono tracking-[0.4em] uppercase font-medium">
-                  {slideData.subtitle || "TEAM NAME"}
-                </span>
-              </div>
-              <span className="text-[9px] font-mono tracking-[0.4em] uppercase font-medium text-right">
-                {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
-              </span>
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'resource-icons' || type === 'icons') {
-        const IconGroup = ({ title, icons }) => (
-          <div className="flex-1 min-w-0">
-            <h3 className="text-[calc(1.3rem*var(--font-scale))] font-bold text-center mb-6 text-slate-800 tracking-tight">{title}</h3>
-            <div className="grid grid-cols-7 gap-y-8 gap-x-4">
-              {icons.map((iconName, idx) => (
-                <div key={idx} className="flex flex-col items-center justify-center gap-1 group">
-                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-indigo-50 group-hover:bg-indigo-600 transition-all duration-300 shadow-sm border border-indigo-100/50 group-hover:scale-110">
-                    <span className="material-icons text-[24px] text-indigo-900 group-hover:text-white transition-colors">
-                      {iconName}
-                    </span>
-                  </div>
-                  <span className="font-bold text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter truncate w-full text-center" style={{ fontSize: 'calc(0.5rem * var(--font-scale))' }}>
-                    {iconName.replace(/_/g, ' ')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
-        return (
-          <div className="absolute inset-0 flex flex-col p-16 z-20 overflow-hidden select-none bg-[#FDFBF4] text-[#1E1B4B]">
-            <div className="mb-12 text-center">
-              <h1 className="text-[calc(3.5rem*var(--font-scale))] font-black tracking-tighter mb-4 text-[#1E1B4B]">아이콘 리소스 (Icon Resources)</h1>
-              <div className="w-24 h-1 bg-[#1E1B4B] mx-auto mb-6 rounded-full opacity-20" />
-              <p className="opacity-70 font-medium text-[calc(1.1rem*var(--font-scale))] max-w-2xl mx-auto">프레젠테이션의 시각적 완성도를 높이기 위해 엄선된 Material 디자인 아이콘 세트입니다. 크기와 색상을 자유롭게 조절하여 사용하세요.</p>
-            </div>
-
-            <div className="flex justify-between w-full flex-1 gap-16 px-4">
-              <IconGroup
-                title="Business & Efficiency"
-                icons={['analytics', 'pie_chart', 'trending_up', 'assignment', 'dashboard', 'speed', 'workspace_premium', 'monitoring', 'insights', 'account_balance', 'stars', 'target', 'groups', 'schedule']}
-              />
-              <IconGroup
-                title="Tech & Innovation"
-                icons={['bolt', 'psychology', 'auto_awesome', 'rocket_launch', 'memory', 'cloud', 'wifi', 'settings', 'devices', 'biotech', 'smart_toy', 'lightbulb', 'terminal', 'code']}
-              />
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'resource-graphics' || type === 'resources') {
-        return (
-          <div className="absolute inset-0 flex flex-col p-16 z-20 overflow-hidden select-none bg-[#FDFBF4] text-[#1E1B4B]">
-            <div className="mb-12">
-              <h1 className="text-[calc(3rem*var(--font-scale))] font-black tracking-tighter mb-4">그래픽 리소스 (Graphic Resources)</h1>
-              <div className="w-24 h-1 bg-[#1E1B4B] mb-6 rounded-full opacity-20" />
-              <p className="opacity-70 font-medium text-[calc(1.1rem*var(--font-scale))] max-w-2xl">모든 개체는 품질 저하 없이 자유롭게 크기 조절이 가능한 벡터 그래픽입니다. 색상 변경 시 개체 그룹을 해제하여 원하는 파츠를 선택하세요.</p>
-            </div>
-
-            <div className="flex-1 grid grid-cols-3 gap-16 px-2">
-              {/* Left Column: Banners & Ribbons */}
-              <div className="flex flex-col gap-10 w-full pt-4">
-                <div className="h-12 w-full bg-[#1E1B4B] rounded-r-full flex items-center shadow-lg relative">
-                  <div className="absolute -right-5 w-10 h-10 rotate-45 bg-[#1E1B4B]"></div>
-                  <div className="pl-6 font-black text-white/50 tracking-[0.3em] uppercase" style={{ fontSize: 'calc(0.625rem * var(--font-scale))' }}>Premium Asset</div>
-                </div>
-                <div className="h-12 w-[90%] bg-[#7C3AED] rounded flex items-center pl-8 shadow-lg relative overflow-hidden">
-                  <div className="absolute -left-6 w-12 h-12 rotate-45 bg-[#FDFBF4] z-10 shadow-inner"></div>
-                  <div className="font-black text-white/50 tracking-[0.3em] uppercase" style={{ fontSize: 'calc(0.625rem * var(--font-scale))' }}>Editable Layer</div>
-                </div>
-                <div className="h-20 w-full bg-[#4F46E5] rounded-3xl flex items-center justify-center shadow-lg relative group">
-                  <div className="absolute -bottom-4 left-1/3 w-8 h-8 rotate-45 bg-[#4F46E5]"></div>
-                  <div className="font-black text-white/30 tracking-[0.3em] uppercase" style={{ fontSize: 'calc(0.625rem * var(--font-scale))' }}>Callout Bubble</div>
-                </div>
-                <div className="h-24 w-full bg-[#312E81] rounded-sm flex flex-col justify-center items-center shadow-xl relative mt-4">
-                  <div className="absolute -top-5 w-0 h-0 border-l-[25px] border-l-transparent border-b-[25px] border-b-[#312E81] border-r-[25px] border-r-transparent"></div>
-                  <div className="font-black text-white/20 tracking-[0.3em] uppercase" style={{ fontSize: 'calc(0.625rem * var(--font-scale))' }}>Badge Header</div>
-                </div>
-              </div>
-
-              {/* Middle Column: Charts & Diagrams */}
-              <div className="grid grid-cols-2 gap-12 place-items-center opacity-90 h-max pt-8">
-                {/* Chart 1 */}
-                <div className="flex flex-col items-center gap-3">
-                  <svg viewBox="0 0 100 100" className="w-24 h-24 filter drop-shadow-xl">
-                    <circle cx="50" cy="50" r="45" fill="#E0E7FF" />
-                    <path d="M50 50 L50 0 A50 50 0 0 1 100 50 Z" fill="#7C3AED" />
-                    <path d="M50 50 L100 50 A50 50 0 0 1 50 100 Z" fill="#4F46E5" />
-                  </svg>
-                  <span className="font-black text-slate-300 tracking-[0.2em] uppercase" style={{ fontSize: 'calc(0.5625rem * var(--font-scale))' }}>Cycle</span>
-                </div>
-                {/* Chart 2 */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-24 h-24 rounded-full border-[14px] border-[#312E81] relative flex items-center justify-center bg-white shadow-xl">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-[#7C3AED] rounded-full"></div>
-                  </div>
-                  <span className="font-black text-slate-300 tracking-[0.2em] uppercase" style={{ fontSize: 'calc(0.5625rem * var(--font-scale))' }}>Doughnut</span>
-                </div>
-                {/* Chart 3 */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-24 h-24 rounded-full bg-[#1E1B4B] flex flex-wrap shadow-2xl overflow-hidden rotate-45 transform">
-                    <div className="w-1/2 h-1/2 bg-[#7C3AED]"></div>
-                    <div className="w-1/2 h-1/2 bg-[#4F46E5] opacity-80"></div>
-                    <div className="w-1/2 h-1/2 bg-white/10"></div>
-                    <div className="w-1/2 h-1/2 bg-[#1E1B4B]"></div>
-                  </div>
-                  <span className="font-black text-slate-300 tracking-[0.2em] uppercase" style={{ fontSize: 'calc(0.5625rem * var(--font-scale))' }}>Matrix</span>
-                </div>
-                {/* Chart 4 */}
-                <div className="flex flex-col items-center gap-3">
-                  <div className="w-24 h-24 border-[10px] border-dashed border-[#7C3AED] rounded-full flex items-center justify-center opacity-60">
-                    <span className="material-icons text-[32px] text-[#7C3AED]">add</span>
-                  </div>
-                  <span className="font-black text-slate-300 tracking-[0.2em] uppercase" style={{ fontSize: 'calc(0.5625rem * var(--font-scale))' }}>Container</span>
-                </div>
-              </div>
-
-              {/* Right Column: Arrows & Process */}
-              <div className="flex flex-col items-center gap-10 py-4 opacity-80">
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className="flex items-center gap-6 w-full group">
-                    <div className="w-10 h-10 rounded-full bg-[#1E1B4B] text-white flex items-center justify-center font-black text-xs shadow-lg group-hover:scale-110 transition-transform">
-                      {i + 1}
-                    </div>
-                    <svg viewBox="0 0 100 12" className="flex-1 h-3 drop-shadow-sm">
-                      <polygon points="0,4 85,4 85,0 100,6 85,12 85,8 0,8" fill={i % 2 === 0 ? "#7C3AED" : "#312E81"} />
-                    </svg>
-                  </div>
-                ))}
-                <div className="mt-4 flex flex-col items-center gap-4">
-                  <div className="w-32 h-1 bg-slate-200 rounded-full" />
-                  <div className="flex gap-4">
-                    <div className="w-8 h-8 rounded-full bg-[#7C3AED] shadow-lg flex items-center justify-center text-white">
-                      <span className="material-icons text-[18px]">chevron_left</span>
-                    </div>
-                    <div className="w-8 h-8 rounded-full bg-[#1E1B4B] shadow-lg flex items-center justify-center text-white">
-                      <span className="material-icons text-[18px]">chevron_right</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-            </div>
-
-            <div className="absolute right-8 top-12 text-[#1E1B4B]/10">
-              <span className="material-icons text-[120px]">brush</span>
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'premium-agenda-spoke' || type === 'index') {
-        const items = slideData.content ? slideData.content.split('\n').filter(l => l.trim()) : [];
-        return (
-          <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none bg-white text-black font-sans">
-            {/* Top Bar */}
-            <div className="flex justify-between items-start z-10 w-full">
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {projectName || "COMPANY NAME"}
-              </span>
-            </div>
-
-            {/* Top Section: Header */}
-            <div className="z-10 mt-4">
-              <h1 className="text-[calc(4rem*var(--font-scale))] font-bold tracking-tight uppercase">AGENDA</h1>
-            </div>
-
-            {/* Top Right: Spoke Graphic */}
-            <div className="absolute top-4 -right-20 w-[45%] h-[45%] opacity-90 pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                {Array.from({ length: 16 }).map((_, i) => (
-                  <line
-                    key={i}
-                    x1="50" y1="50"
-                    x2={50 + 45 * Math.cos((i * 22.5) * Math.PI / 180)}
-                    y2={50 + 45 * Math.sin((i * 22.5) * Math.PI / 180)}
-                    stroke="currentColor"
-                    strokeWidth="0.5"
-                  />
-                ))}
-              </svg>
-            </div>
-
-            {/* AI Selected Image Rendering */}
-            {slideImages[type] && (
-              <div
-                className={cn(
-                  "absolute z-0 flex items-center justify-center pointer-events-none fade-in animate-in",
-                  slideData.imagePlacement === 'background-cover' ? "inset-0 w-full h-full opacity-10" :
-                    slideData.imagePlacement === 'split-right' ? "top-0 right-0 w-1/2 h-full opacity-30" :
-                      "top-12 right-12 w-[35%] h-[45%]" // default for icon-floating
-                )}
-                style={{ mixBlendMode: slideData.imageBlendMode === 'multiply' ? 'multiply' : 'normal' }}
-              >
-                <img
-                  src={slideImages[type] instanceof File ? URL.createObjectURL(slideImages[type]) : slideImages[type]}
-                  className={cn(
-                    "max-w-full max-h-full filter drop-shadow-2xl",
-                    slideData.imagePlacement === 'background-cover' ? "object-cover w-full h-full" : "object-contain"
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Central Content: Agenda List */}
-            <div className="max-w-[85%] z-10 flex flex-col gap-2 mt-auto mb-16">
-              {items.map((item, i) => (
-                <div key={i} className="text-[calc(1.25rem*var(--font-scale))] font-medium tracking-tight whitespace-nowrap">
-                  {item}
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Bar: Corner Labels */}
-            <div className="flex justify-between items-end z-10 w-full">
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {slideData.subtitle || "TEAM NAME"}
-              </span>
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
-              </span>
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'premium-cover-spoke' || (isCover && layoutStyle === 'cover-brand')) {
-        const accentColor = theme.accent || '#D1D1C4';
-        return (
-          <div className="absolute inset-0 flex flex-col justify-between p-16 z-20 overflow-hidden select-none" style={{ backgroundColor: '#000000', color: accentColor }}>
-            {/* Top Bar */}
-            <div className="flex justify-between items-start z-10 w-full">
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {projectName || "COMPANY NAME"}
-              </span>
-            </div>
-
-            {/* Middle Section: Spoke Graphic - Reference Exact Position */}
-            <div className="absolute top-1/2 -right-24 -translate-y-1/2 w-[60%] h-[100%] opacity-50 pointer-events-none">
-              <svg viewBox="0 0 100 100" className="w-full h-full">
-                <line x1="0" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="50" y1="0" x2="50" y2="100" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="15" y1="15" x2="85" y2="85" stroke="currentColor" strokeWidth="0.25" />
-                <line x1="85" y1="15" x2="15" y2="85" stroke="currentColor" strokeWidth="0.25" />
-              </svg>
-            </div>
-
-            {/* AI Selected Image Rendering */}
-            {slideImages[type] && (
-              <div
-                className={cn(
-                  "absolute z-0 flex items-center justify-center pointer-events-none fade-in animate-in",
-                  slideData.imagePlacement === 'background-cover' ? "inset-0 w-full h-full opacity-40 mix-blend-overlay" :
-                    slideData.imagePlacement === 'split-right' ? "top-0 right-0 w-1/2 h-full opacity-80" :
-                      "top-1/2 right-24 -translate-y-1/2 w-[40%] h-[60%]" // default for icon-floating
-                )}
-                style={{ mixBlendMode: slideData.imageBlendMode === 'multiply' ? 'multiply' : (slideData.imagePlacement === 'background-cover' ? 'overlay' : 'normal') }}
-              >
-                <img
-                  src={slideImages[type] instanceof File ? URL.createObjectURL(slideImages[type]) : slideImages[type]}
-                  className={cn(
-                    "max-w-full max-h-full filter drop-shadow-2xl",
-                    slideData.imagePlacement === 'background-cover' ? "object-cover w-full h-full" : "object-contain"
-                  )}
-                />
-              </div>
-            )}
-
-            {/* Title Section: Improved Positioning for Typographic Contrast */}
-            <div className="max-w-[80%] z-10 flex flex-col gap-0 mt-auto mb-4">
-              <h1
-                className="font-bold tracking-[-0.05em] leading-[1.05] uppercase text-[#D1D1C4]" // Using the warm off-white from reference
-                style={{
-                  fontSize: 'calc(3.25rem * var(--font-scale))' // 52px
-                }}
-              >
-                {(slideData.title || projectName || "USER RESEARCH SESSION").split(' ').map((word, i) => (
-                  <div key={i} className="whitespace-nowrap">{word}</div>
-                ))}
-              </h1>
-            </div>
-
-            {/* Bottom Bar: Corner Labels */}
-            <div className="flex justify-between items-end z-10 w-full">
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {slideData.subtitle || "TEAM NAME"}
-              </span>
-              <span className="text-[11px] font-mono tracking-[0.4em] uppercase opacity-60 font-medium">
-                {new Date().toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
-              </span>
-            </div>
-          </div>
-        );
-      }
-
-      if (layoutStyle === 'cover-brand' || isCover) {
-        return (
-          <div className="h-full flex flex-col items-center justify-center text-center gap-8 relative">
-            {layoutProps.headerBadge && (
-              <div
-                className="px-6 py-2 rounded-full text-[12px] font-black uppercase tracking-[0.3em] border"
-                style={{ backgroundColor: theme.accent + '20', color: theme.accent, borderColor: theme.accent + '40', marginBottom: '1rem' }}
-              >
-                {layoutProps.headerBadge}
-              </div>
-            )}
-            <h1 className="font-bold tracking-tight leading-[1.1] max-w-4xl" style={{ fontSize: 'calc(3.25rem * var(--font-scale))', color: theme.text }}>
-              {slideData.title || projectName}
-            </h1>
-            <p className="opacity-70 font-medium max-w-2xl mt-4" style={{ fontSize: 'calc(1.25rem * var(--font-scale))', color: theme.text }}>
-              {slideData.subtitle || slideData.content}
-            </p>
-            {layoutProps.decorativeElement === 'underline' ? (
-              <div className="w-32 h-2 rounded-full" style={{ backgroundColor: theme.accent }} />
-            ) : (
-              <div className="w-20 h-1 rounded-full opacity-20" style={{ backgroundColor: theme.accent }} />
-            )}
-
-            {/* Cover Assets */}
-            {slideImages.cover ? (
-              <div className="absolute inset-0 -z-10 opacity-30">
-                <img
-                  src={slideImages.cover instanceof File ? URL.createObjectURL(slideImages.cover) : slideImages.cover}
-                  alt=""
-                  className="w-full h-full object-cover blur-3xl scale-110"
-                />
-              </div>
-            ) : characterPreview && (
-              <div className="absolute bottom-12 right-12 w-48 h-48">
-                <img src={characterPreview} alt="Character" className="w-full h-full object-contain filter drop-shadow-2xl" />
-              </div>
-            )}
-          </div>
-        );
-      }
-
-      // Default Body
-      return (
-        <div className="h-full flex flex-col gap-6">
-          <h2 className="font-bold tracking-tight" style={{ fontSize: 'calc(2rem * var(--font-scale))', color: theme.text }}>
-            {slideData.title}
-          </h2>
-          <p className="opacity-80 font-normal" style={{ fontSize: 'calc(1rem * var(--font-scale))', color: theme.text }}>
-            {slideData.content}
-          </p>
-        </div>
-      );
-    };
-
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
     return (
       <div
         ref={el => slideRefs.current[type] = el}
         className={cn("relative shrink-0 snap-center p-4 group", ratioClass)}
       >
-<<<<<<< HEAD
         <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/5 relative transition-all duration-700 hover:ring-primary/30">
-          <PremiumSlideCanvas slides={[slideData]} ratio={effectiveRatio} previewMode={true} />
-=======
-        <div
-          className={cn(ratioClass, "shadow-[0_20px_50px_-12px_rgba(0,0,0,0.15)] rounded-xl overflow-hidden flex flex-col relative transition-all duration-700 group ring-1 ring-black/5 break-keep break-words min-w-0")}
-          style={{
-            ...bgStyle,
-            color: theme.text,
-            fontFamily: '"Pretendard Variable", "Pretendard", sans-serif',
-            '--font-scale': fontScale
-          }}
-        >
-          {typeof slideImages[type] === 'string' && slideImages[type].startsWith('data:image') ? (
-            <div className="absolute inset-0 w-full h-full z-40 bg-black">
-              <img src={slideImages[type]} className="w-full h-full object-contain pointer-events-none" alt="AI Generated Slide" />
-            </div>
-          ) : (
-            <>
-              {/* 1. Global Background Effects - Removed Noise for Premium Light look */}
-
-              {/* Ambient Glow - Hidden on Light Mode for cleaner look */}
-              {layoutProps.themeMode === 'dark' && (
-                <>
-                  <div className="absolute inset-0 opacity-[0.05] mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cube-coat.png')] pointer-events-none" />
-                  <div className="absolute -top-[20%] -right-[10%] w-[60%] h-[60%] rounded-full blur-[120px] opacity-30 animate-pulse pointer-events-none" style={{ background: theme.accent }} />
-                  <div className="absolute -bottom-[20%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[100px] opacity-20 pointer-events-none" style={{ background: theme.accent }} />
-                </>
-              )}
-
-              {/* 2. Content Layer */}
-              <div className="relative z-10 w-full h-full flex flex-col p-6">
-
-                {/* 1. Global Logos Removed from here */}
-
-                {/* Page Number Removed */}
-
-                {/* --- HEADER (Except Cover & Resources) --- */}
-                {!isCover && type !== 'icons' && type !== 'resources' && (
-                  <div className="flex flex-col gap-4 mb-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-bold tracking-tight leading-tight" style={{ color: theme.text, fontSize: 'calc(2rem * var(--font-scale))' }}>
-                        {slideData.title || (type === 'cover' ? 'STRATEGY PROPOSAL' : type === 'index' ? 'CONTENTS' : type === 'divider' ? 'SECTION BREAK' : 'INSIGHT ANALYSIS')}
-                      </h2>
-                      <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest border border-current opacity-30">
-                        {projectName}
-                      </div>
-                    </div>
-                    {slideData.subtitle && (
-                      <p className="opacity-60 font-medium" style={{ fontSize: 'calc(1.25rem * var(--font-scale))' }}>{slideData.subtitle}</p>
-                    )}
-                    <div className="h-[2px] w-full rounded-full opacity-10 bg-current" />
-                  </div>
-                )}
-
-                {/* Visual Elements */}
-                <div className="flex-1 min-h-0 relative">
-                  {!isCover && renderContent()}
-                </div>
-
-                {/* Footer Removed */}
-              </div>
-
-              {/* Cover Layer - Renders outside padding for edge-to-edge layouts */}
-              {isCover && renderContent()}
-
-              {/* Interactive Elements / AI Rationale Hint Removed */}
-            </>
-          )}
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
-
-          {/* Visual Elements positioned absolutely if needed - ONLY on the currently selected slide */}
-          {type === currentSlideType && canvasAssets.map(asset => (
-            <div key={asset.id} className="absolute pointer-events-none z-30" style={{ left: asset.x, top: asset.y, transform: 'translate(-50%, -50%)' }}>
-              <img src={asset.url} alt="" className="w-48 h-48 object-contain filter drop-shadow-2xl" />
-            </div>
-          ))}
+          <PremiumSlideCanvas
+            slides={[slideData]}
+            ratio={effectiveRatio}
+            previewMode={true}
+            slideImages={slideImages}
+            projectName={projectName}
+          />
         </div>
       </div>
     );
@@ -1681,20 +988,13 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
           >
             <X className="w-6 h-6" />
           </Button>
-<<<<<<< HEAD
-          <PremiumSlideCanvas slides={generatedSlides} ratio={ratio} />
-=======
-          <SpectacleSlides
+          <PremiumSlideCanvas
             slides={generatedSlides}
             ratio={ratio}
-            projectName={projectName}
-            logoPreview={logoPreview}
-            clientLogoPreview={clientLogoPreview}
-            characterPreview={characterPreview}
             slideImages={slideImages}
+            projectName={projectName}
           />
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
-        </div>
+        </div >
       ) : (
         <div className="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden relative">
           {/* 3. Header */}
@@ -1891,11 +1191,7 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
             {/* 5. Main Canvas (Center) */}
             <main className="flex-1 flex flex-col bg-slate-50/50 bg-[radial-gradient(#e2e8f0_1px,transparent_1px)] [background-size:24px_24px] relative overflow-hidden transition-all duration-300 min-w-0 min-h-0">
 
-<<<<<<< HEAD
-              {/* Removed Context Analysis Strategy Banner as per user request */}
-=======
               {/* Context Analysis Strategy Banner Removed */}
->>>>>>> ca5f603 (fix: Implement dynamic typography scaling and text overflow guards across all slide types)
 
               {/* Loading Overlay (Full Screen) */}
               {isGeneratingAI && <LoadingOverlay />}
@@ -1929,14 +1225,15 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
                   </Button>
                 ))}
               </div>
-            </main>
+            </main >
 
             {/* 6. Push-style Visual Asset Panel (Part of Flex Flow) */}
-            <div
-              className={cn(
-                "bg-background z-40 border-l border-border flex flex-col relative",
-                !isDraggingPanel && "transition-all duration-300"
-              )}
+            < div
+              className={
+                cn(
+                  "bg-background z-40 border-l border-border flex flex-col relative",
+                  !isDraggingPanel && "transition-all duration-300"
+                )}
               style={{
                 width: showVisualPanel ? panelWidth : 0
               }}
@@ -1951,10 +1248,10 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
               <div className="h-full relative shrink-0 overflow-hidden" style={{ width: panelWidth }}>
                 <iframe src="/creon/index.html" className="w-full h-full border-none" title="Visual Assets" />
               </div>
-            </div>
+            </div >
 
             {/* 7. Asset Strip (Always Far Right) */}
-            <div className="w-14 bg-card border-l flex flex-col items-center py-4 gap-6 z-[45] shrink-0">
+            < div className="w-14 bg-card border-l flex flex-col items-center py-4 gap-6 z-[45] shrink-0" >
               <div
                 className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer transition-all hover:scale-105 overflow-hidden",
@@ -1968,10 +1265,10 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
               <Button variant="ghost" size="icon" className="w-10 h-10 rounded-xl border border-dashed border-slate-200 text-slate-300 hover:text-primary hover:border-primary/30 transition-all">
                 <Plus className="w-5 h-5" />
               </Button>
-            </div>
+            </div >
 
-          </div>
-        </div>
+          </div >
+        </div >
       )}
 
       {/* Modals & Dialogs */}
@@ -1982,7 +1279,7 @@ Please analyze this new image. Rewrite the slide's content, title, and adjust th
       <input type="file" ref={logoInputRef} className="hidden" accept="image/*" onChange={(e) => handleLogoUpload(e)} />
       <input type="file" ref={clientLogoInputRef} className="hidden" accept="image/*" onChange={(e) => handleClientLogoUpload(e)} />
       <input type="file" ref={charInputRef} className="hidden" accept="image/*" onChange={(e) => handleCharUpload(e)} />
-    </div>
+    </div >
   );
 };
 
